@@ -44,9 +44,20 @@ public class User {
 
     public User(){}
 
-    public User(String firstname, String lastname, String email, String password, Role role) {
+    public User(String firstname, String lastname,String username, String email, String password) {
         this.firstname = firstname;
         this.lastname = lastname;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = Role.USER;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public User(String firstname, String lastname,String username, String email, String password,Role role) {
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.username = username;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -85,7 +96,6 @@ public class User {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
 
 
     public String getEmail() {

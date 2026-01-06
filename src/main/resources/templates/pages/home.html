@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" href="/css/style.css">
     <meta charset="UTF-8">
-    <title>BROOM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomBooker - Réservez votre espace</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/home.css}">
 </head>
 <body>
 
-<div>
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
-</div>
-<h1>Hello World</h1>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="hero">
+    <h1>Réservez votre salle de réunion en un clic</h1>
+    <p>Des espaces modernes, équipés et adaptés à tous vos besoins professionnels. Simple, rapide et efficace.</p>
+    <div class="cta-group">
+        <a th:href="@{/booking}" class="btn-primary">Réserver maintenant</a>
+        <a th:href="@{/register}" class="btn-secondary">Créer un compte</a>
+    </div>
+</main>
 </body>
 </html>

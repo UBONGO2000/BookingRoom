@@ -6,22 +6,19 @@
 <div class="container">
     <div class="card" th:fragment="card (title, capacity, location)">
         <div class="img">
-            <img th:src="@{/images/img.png}" alt="images meeting room">
+            <img th:src="@{/images/img.png}" alt="Room image">
         </div>
 
         <div class="content">
-            <h3 class="principal" th:text="${title}">Titre par defaut</h3>
-            <p>Capacités: <span th:text="${capacity}"></span></p>
-            <p>Localisation: <span th:text="${location}"></span></p>
-            <p></p>
-<!--            <p>Date : <span th:text="${date}"></span></p>-->
-<!--            <p>Heure :  <span th:text="${hour}"></span></p>-->
+            <h3 th:text="${title}">Titre par défaut</h3>
+            <p>Capacité <span><th:block th:text="${capacity}"></th:block> pers.</span></p>
+            <p>Localisation <span><th:block th:text="${location}"></th:block></span></p>
+            
             <div class="action">
-                <button class="detail"><a href="#">Voir les détails</a></button>
-                <button class="anuler"><a href="#">Annuler</a></button>
+                <button class="btn-detail">Voir détails</button>
+                <button class="btn-cancel">Annuler</button>
             </div>
         </div>
-
     </div>
 </div>
 

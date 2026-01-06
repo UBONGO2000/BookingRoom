@@ -2,47 +2,31 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>DASHBOARD</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - RoomBooker</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/card.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard.css}">
 </head>
 <body>
 
-<!--Navbar-->
-
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<!--Main-->
-
 <main>
-    <h1 class="principal">Bonjour, ${user.name}</h1>
+    <header class="welcome-header">
+        <h1 th:if="${user != null}" th:text="${'Bonjour, ' + user.firstname}">Bonjour, Utilisateur</h1>
+        <p>Gérez vos réservations et découvrez nos espaces disponibles.</p>
+    </header>
+
     <section class="reservation">
+        <h2 class="section-title">Vos Réservations à Venir</h2>
 
-        <h4 class="principal center" >Vos Réservations à Venir</h4>
-
-        <div class="cards">
-            <div th:each="room : ${rooms}">
+        <div class="cards-grid">
+            <th:block th:each="room : ${rooms}">
                 <div th:replace="~{fragments/card :: card(${room.getName()}, ${room.getCapacity()}, ${room.getLocation()})}"></div>
-            </div>
+            </th:block>
         </div>
-
-
-
-<!--        <div class="booking" th:if="${user.bookings.isEmpty()}">-->
-
-<!--            <p>Vous n'avez aucune reservations en cours</p>-->
-
-<!--        </div>-->
-
-<!--        <div class="booking" th:if="${!user.bookings.isEmpty()}">-->
-
-<!--            <div th:each="booking : ${user.bookings}">-->
-
-<!--                    <div th:replace="~{fragments/card.html :: card}"></div>-->
-
-<!--            </div>
-
-
-        </div>-->
     </section>
 </main>
 

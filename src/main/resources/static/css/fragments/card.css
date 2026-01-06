@@ -1,0 +1,85 @@
+.card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.card .img {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.card .img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card .content {
+    padding: 1.5rem;
+}
+
+.card .content h3 {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.card .content p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.card .content p span {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.card .action {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.card button {
+    flex: 1;
+    padding: 0.625rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+}
+
+.card .btn-detail {
+    background-color: var(--primary);
+    color: white;
+}
+
+.card .btn-detail:hover {
+    background-color: var(--primary-hover);
+}
+
+.card .btn-cancel {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.card .btn-cancel:hover {
+    background-color: #fee2e2;
+    color: var(--danger);
+    border-color: #fecaca;
+}

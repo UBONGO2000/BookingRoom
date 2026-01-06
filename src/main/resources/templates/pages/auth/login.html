@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - RoomBooker</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Bon retour !</h2>
+    <p>Connectez-vous pour gérer vos réservations.</p>
+
+    <div th:if="${param.error}" class="error-msg" style="color: #ef4444; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+        Identifiants invalides.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <!-- Champ Username -->
+        <div class="input-group">
+            <label for="username">Nom d'utilisateur</label>
+            <div class="input-wrapper">
+                <!-- Icône SVG User -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <input type="text" id="username" name="username" placeholder="ex: jean.dupont" required autocomplete="username">
+            </div>
+        </div>
+
+        <!-- Champ Password -->
+        <div class="input-group">
+            <label for="password">Mot de passe</label>
+            <div class="input-wrapper">
+                <!-- Icône SVG Lock -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3 3.1-3 1.71 0 3.1 1.29 3.1 3v2z"/>
+                </svg>
+                <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+        </div>
+
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <div  class="register-link">
+        Pas encore de compte ? <a th:href="@{/register}">S'inscrire</a>
+    </div>
+</div>
+
+</body>
+</html>

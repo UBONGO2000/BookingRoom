@@ -1,0 +1,71 @@
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    background-color: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.025em;
+}
+
+.menu ul {
+    display: flex;
+    gap: 2rem;
+}
+
+.menu a {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.menu a:hover {
+    color: var(--primary);
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile span {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.btn-logout {
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.btn-logout:hover {
+    background-color: var(--border-color);
+    color: var(--danger);
+}
+
+.btn-login {
+    padding: 0.5rem 1.25rem;
+    background-color: var(--primary);
+    color: white !important;
+    border-radius: var(--radius);
+    font-weight: 600;
+}
+
+.btn-login:hover {
+    background-color: var(--primary-hover);
+}
