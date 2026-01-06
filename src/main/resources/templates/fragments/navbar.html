@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="navbar">
+
+    <nav>
+        <h2>RoomBooker</h2>
+        <div class="menu">
+            <ul>
+                <li><a th:href="@{/dashboard}">Tableau de Bord</a></li>
+                <li><a th:href="@{/booking}">Réserver une Salle</a></li>
+                <li><a href="#">MesRéservations</a></li>
+            </ul>
+        </div>
+
+        <div class="profile">
+            <span>Hello, ${user.name}</span>
+            <span>
+                <a href="/logout">Déconnexion</a>
+            </span>
+        </div>
+    </nav>
+</div>
+
+</body>

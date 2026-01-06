@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div class="container">
+    <div class="card" th:fragment="card (title, capacity, location)">
+        <div class="img">
+            <img th:src="@{/images/img.png}" alt="images meeting room">
+        </div>
+
+        <div class="content">
+            <h3 class="principal" th:text="${title}">Titre par defaut</h3>
+            <p>Capacités: <span th:text="${capacity}"></span></p>
+            <p>Localisation: <span th:text="${location}"></span></p>
+            <p></p>
+<!--            <p>Date : <span th:text="${date}"></span></p>-->
+<!--            <p>Heure :  <span th:text="${hour}"></span></p>-->
+            <div class="action">
+                <button class="detail"><a href="#">Voir les détails</a></button>
+                <button class="anuler"><a href="#">Annuler</a></button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>

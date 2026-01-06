@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DASHBOARD</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!--Navbar-->
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!--Main-->
+
+<main>
+    <h1 class="principal">Bonjour, ${user.name}</h1>
+    <section class="reservation">
+
+        <h4 class="principal center" >Vos Réservations à Venir</h4>
+
+        <div class="cards">
+            <div th:each="room : ${rooms}">
+                <div th:replace="~{fragments/card :: card(${room.getName()}, ${room.getCapacity()}, ${room.getLocation()})}"></div>
+            </div>
+        </div>
+
+
+
+<!--        <div class="booking" th:if="${user.bookings.isEmpty()}">-->
+
+<!--            <p>Vous n'avez aucune reservations en cours</p>-->
+
+<!--        </div>-->
+
+<!--        <div class="booking" th:if="${!user.bookings.isEmpty()}">-->
+
+<!--            <div th:each="booking : ${user.bookings}">-->
+
+<!--                    <div th:replace="~{fragments/card.html :: card}"></div>-->
+
+<!--            </div>
+
+
+        </div>-->
+    </section>
+</main>
+
+</body>
+</html>
