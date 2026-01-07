@@ -94,7 +94,7 @@ public class BookingController {
             } catch (Exception e) {
                 // Encoder le message d'erreur pour l'URL
                 String encodedError = java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
-                return "redirect:/booking/booking/" + roomId + "?error=" + encodedError;
+                return "redirect:/booking/" + roomId + "?error=" + encodedError;
             }
         }
         return "redirect:/dashboard";

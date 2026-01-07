@@ -63,7 +63,7 @@
             <div th:if="${errorMessage}" style="background: var(--danger); color: white; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;" th:text="${errorMessage}">
                 Erreur lors de la réservation.
             </div>
-            <form th:action="@{/booking/booking/confirm}" method="post">
+            <form th:action="@{/booking/confirm}" method="post">
                 <input type="hidden" name="roomId" th:value="${room.id}">
                 <div class="form-group">
                     <label for="title">Objet de la réunion</label>

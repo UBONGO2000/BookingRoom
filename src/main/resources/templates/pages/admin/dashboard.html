@@ -95,7 +95,7 @@
                     <td th:text="${#temporals.format(booking.startTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</td>
                     <td th:text="${#temporals.format(booking.endTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 14:00</td>
                     <td>
-                        <form th:action="@{/booking/booking/cancel/{id}(id=${booking.id})}" method="post">
+                        <form th:action="@{/booking/cancel/{id}(id=${booking.id})}" method="post">
                             <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="return confirm('Annuler cette réservation ?')">Annuler</button>
                         </form>
                     </td>

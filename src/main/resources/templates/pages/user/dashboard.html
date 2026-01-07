@@ -38,8 +38,8 @@
                             <p>Début : <span th:text="${#temporals.format(b.startTime, 'dd/MM/yyyy HH:mm')}"></span></p>
                             <p>Fin : <span th:text="${#temporals.format(b.endTime, 'dd/MM/yyyy HH:mm')}"></span></p>
                             <div class="action">
-                                <a th:href="@{/booking/booking/{id}(id=${b.room.id})}" class="btn-detail" style="text-decoration: none; display: inline-block; text-align: center;">Voir salle</a>
-                                <form th:action="@{/booking/booking/cancel/{id}(id=${b.id})}" method="post" style="flex: 1;">
+                                <a th:href="@{/booking/{id}(id=${b.room.id})}" class="btn-detail" style="text-decoration: none; display: inline-block; text-align: center;">Voir salle</a>
+                                <form th:action="@{/booking/cancel/{id}(id=${b.id})}" method="post" style="flex: 1;">
                                     <button type="submit" class="btn-cancel" style="width: 100%;" onclick="return confirm('Voulez-vous vraiment annuler cette réservation ?')">Annuler</button>
                                 </form>
                             </div>
