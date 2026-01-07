@@ -15,9 +15,9 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User register(String firstname, String lastname, String username, String email, String password) {
-        if(existByUsername(username)){
-            userRepository.save(new User(firstname, lastname, username,email, password));
-            return new User(firstname, lastname, username, email, password);
+        if(!existByUsername(username)){
+            User user = new User(firstname, lastname, username, email, password);
+            return userRepository.save(user);
         }
         return null;
     }

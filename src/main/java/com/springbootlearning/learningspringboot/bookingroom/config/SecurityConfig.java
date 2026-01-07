@@ -20,10 +20,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(
                 auth ->auth
-                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**").permitAll()
-                        .requestMatchers("/dashboard").hasRole("USER")
+                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/dashboard", "/booking/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
         )
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .formLogin(
                         form -> form
                                 .loginPage("/login")

@@ -23,8 +23,29 @@
         <h2 class="section-title">Vos Réservations à Venir</h2>
 
         <div class="cards-grid">
-            <th:block th:each="room : ${rooms}">
-                <div th:replace="~{fragments/card :: card(${room.getName()}, ${room.getCapacity()}, ${room.getLocation()})}"></div>
+            <th:block th:if="${#lists.isEmpty(bookings)}">
+                <p>Vous n'avez pas encore de réservations.</p>
+            </th:block>
+            <th:block th:each="b : ${bookings}">
+                <div class="container">
+                    <div class="card">
+                        <div class="img">
+                            <img th:src="@{/images/img.png}" alt="Room image">
+                        </div>
+                        <div class="content">
+                            <h3 th:text="${b.room.name}">Nom de la salle</h3>
+                            <p><strong th:text="${b.title}">Titre</strong></p>
+                            <p>Début : <span th:text="${#temporals.format(b.startTime, 'dd/MM/yyyy HH:mm')}"></span></p>
+                            <p>Fin : <span th:text="${#temporals.format(b.endTime, 'dd/MM/yyyy HH:mm')}"></span></p>
+                            <div class="action">
+                                <a th:href="@{/booking/booking/{id}(id=${b.room.id})}" class="btn-detail" style="text-decoration: none; display: inline-block; text-align: center;">Voir salle</a>
+                                <form th:action="@{/booking/booking/cancel/{id}(id=${b.id})}" method="post" style="flex: 1;">
+                                    <button type="submit" class="btn-cancel" style="width: 100%;" onclick="return confirm('Voulez-vous vraiment annuler cette réservation ?')">Annuler</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </th:block>
         </div>
     </section>

@@ -3,6 +3,7 @@ package com.springbootlearning.learningspringboot.bookingroom.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,12 @@ public class Room {
     @Column(nullable=false)
     private Boolean videoconferencing;
 
+    @Column(nullable = false)
+    private Boolean available = true;
+
+    private LocalDateTime availableFrom;
+    private LocalDateTime availableUntil;
+
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Booking> bookings =new ArrayList<Booking>();
 
@@ -50,6 +57,7 @@ public class Room {
         this.projector = projector;
         this.whiteboard = whiteboard;
         this.videoconferencing = videoconferencing;
+        this.available = true;
     }
 
 
@@ -117,11 +125,35 @@ public class Room {
         this.videoconferencing = videoconferencing;
     }
 
+    public Boolean getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.available = available;
+    }
+
     public List<Booking> getBookings() {
         return bookings;
     }
 
     public void setBookings(List<Booking> bookings) {
         this.bookings = bookings;
+    }
+
+    public LocalDateTime getAvailableFrom() {
+        return availableFrom;
+    }
+
+    public void setAvailableFrom(LocalDateTime availableFrom) {
+        this.availableFrom = availableFrom;
+    }
+
+    public LocalDateTime getAvailableUntil() {
+        return availableUntil;
+    }
+
+    public void setAvailableUntil(LocalDateTime availableUntil) {
+        this.availableUntil = availableUntil;
     }
 }

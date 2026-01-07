@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la salle - RoomBooker</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/booking.css}">
+    <style>
+        .detail-container { max-width: 1000px; margin: 2rem auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow); color: var(--text-main); }
+        .room-info h1 { margin-bottom: 1rem; color: var(--text-main); }
+        .room-info p { margin-bottom: 0.5rem; color: var(--text-muted); }
+        .equipment { display: flex; gap: 1rem; margin-top: 1rem; }
+        .eq-item { background: var(--bg-main); padding: 5px 12px; border-radius: 20px; font-size: 0.875rem; display: flex; align-items: center; gap: 5px; color: var(--text-main); border: 1px solid var(--border-color); }
+        .booking-form { background: var(--bg-main); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); }
+        .booking-form h2 { margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.3rem; font-size: 0.875rem; color: var(--text-main); }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-card); color: var(--text-main); }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+        .btn-confirm:hover { background: var(--primary-hover); }
+        .btn-confirm:disabled { background: var(--text-muted); cursor: not-allowed; opacity: 0.6; }
+        .existing-bookings { margin-top: 2rem; }
+        .existing-bookings h3 { margin-bottom: 1rem; color: var(--text-main); }
+        .booking-item { padding: 10px; border-bottom: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-main); }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.875rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main>
+    <div class="detail-container">
+        <div class="room-info">
+            <span th:if="${room.available}" class="status-badge" style="background: #dcfce7; color: #166534;">Disponible</span>
+            <span th:unless="${room.available}" class="status-badge" style="background: #fee2e2; color: #991b1b;">Maintenance</span>
+            
+            <h1 th:text="${room.name}">Nom de la salle</h1>
+            <p><strong>Localisation :</strong> <span th:text="${room.location}">Localisation</span></p>
+            <p><strong>Capacité :</strong> <span th:text="${room.capacity}">0</span> personnes</p>
+            <p th:text="${room.description}">Description de la salle...</p>
+
+            <div class="equipment">
+                <div th:if="${room.projector}" class="eq-item">📽️ Projecteur</div>
+                <div th:if="${room.whiteboard}" class="eq-item">📋 Tableau Blanc</div>
+                <div th:if="${room.videoconferencing}" class="eq-item">📹 Vidéo</div>
+            </div>
+
+            <div class="existing-bookings">
+                <h3>Occupations à venir</h3>
+                <div th:if="${#lists.isEmpty(bookings)}">Aucune réservation pour le moment.</div>
+                <div th:each="b : ${bookings}" class="booking-item">
+                    <strong th:text="${#temporals.format(b.startTime, 'dd/MM HH:mm') + ' - ' + #temporals.format(b.endTime, 'dd/MM HH:mm')}">01/01 12:00 - 14:00</strong>
+                    <span th:text="${' : ' + b.title}">Réunion</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-form">
+            <h2>Réserver cette salle</h2>
+            <div th:if="${errorMessage}" style="background: var(--danger); color: white; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;" th:text="${errorMessage}">
+                Erreur lors de la réservation.
+            </div>
+            <form th:action="@{/booking/booking/confirm}" method="post">
+                <input type="hidden" name="roomId" th:value="${room.id}">
+                <div class="form-group">
+                    <label for="title">Objet de la réunion</label>
+                    <input type="text" id="title" name="title" required placeholder="ex: Team Standup">
+                </div>
+                <div class="form-group">
+                    <label for="startTime">Heure de début</label>
+                    <input type="datetime-local" id="startTime" name="startTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="endTime">Heure de fin</label>
+                    <input type="datetime-local" id="endTime" name="endTime" required>
+                </div>
+                <button type="submit" class="btn-confirm" th:disabled="${!room.available}">Confirmer la réservation</button>
+            </form>
+            <p th:unless="${room.available}" style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">Cette salle est actuellement fermée aux réservations.</p>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

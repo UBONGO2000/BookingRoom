@@ -16,35 +16,65 @@
 <main>
     <section class="search-container">
         <h2>Trouver une salle</h2>
-        <form class="search-form" th:action="@{/booking}" method="post">
+        <form class="search-form" th:action="@{/booking}" method="post" th:object="${roomsearch}">
             <div class="form-group">
                 <label for="room">Nom de la salle</label>
-                <input type="text" id="room" name="room" placeholder="ex: Jupiter">
+                <input type="text" id="room" name="room" placeholder="ex: Jupiter" th:field="*{name}">
             </div>
 
             <div class="form-group">
                 <label for="capacity">Capacité minimum</label>
-                <input id="capacity" type="number" name="capacity" min="1" placeholder="Nombre de personnes">
+                <input id="capacity" type="number" name="capacity" min="1" placeholder="Nombre de personnes" th:field="*{capacity}">
             </div>
 
             <div class="form-group">
                 <label class="radio-group">
-                    <input type="radio" name="projecteur" id="projecteur">
+                    <input type="checkbox" name="projector" id="projector" th:field="*{projector}">
                     <span>Avec projecteur</span>
                 </label>
+
+
+                <label class="radio-group">
+                    <input type="checkbox" name="whiteboard" id="whiteboard" th:field="*{whiteboard}">
+                    <span>Avec tableau blanc</span>
+                </label>
+
+
+                <label class="radio-group">
+                    <input type="checkbox" name="videoconferencing" id="videoconferencing" th:field="*{videoconferencing}">
+                    <span>Avec video conference</span>
+                </label>
             </div>
+
 
             <button class="btn-search" type="submit">Rechercher</button>
         </form>
     </section>
 
+    <!-- Section des résultats -->
     <section class="results-section">
-        <h3>Salles disponibles</h3>
-        <div class="cards-grid">
-            <th:block th:each="room : ${rooms}">
-                <div th:replace="~{fragments/card :: card(${room.getName()}, ${room.getCapacity()}, ${room.getLocation()})}"></div>
-            </th:block>
-        </div>
+        <th:block th:if="${room == null && rooms != null}">
+            <h3>Salles disponibles</h3>
+            <div class="cards-grid">
+                <th:block th:each="r : ${rooms}">
+                    <div th:replace="~{fragments/card :: card(${r.id}, ${r.getName()}, ${r.getCapacity()}, ${r.getLocation()})}"></div>
+                </th:block>
+            </div>
+        </th:block>
+
+        <th:block th:if="${room != null}">
+            <h3>Résultat de la recherche</h3>
+            <div class="cards-grid">
+                <div th:replace="~{fragments/card :: card(${room.id}, ${room.getName()}, ${room.getCapacity()}, ${room.getLocation()})}"></div>
+            </div>
+        </th:block>
+
+        <th:block th:if="${room == null && rooms == null}">
+            <div class="no-results">
+                <p>Désolé, aucune salle ne correspond à vos critères.</p>
+                <a th:href="@{/booking}" class="btn-secondary">Voir toutes les salles</a>
+            </div>
+        </th:block>
     </section>
 </main>
 

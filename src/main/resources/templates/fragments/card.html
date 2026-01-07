@@ -4,7 +4,7 @@
 <body>
 
 <div class="container">
-    <div class="card" th:fragment="card (title, capacity, location)">
+    <div class="card" th:fragment="card (id, title, capacity, location)">
         <div class="img">
             <img th:src="@{/images/img.png}" alt="Room image">
         </div>
@@ -15,8 +15,7 @@
             <p>Localisation <span><th:block th:text="${location}"></th:block></span></p>
             
             <div class="action">
-                <button class="btn-detail">Voir détails</button>
-                <button class="btn-cancel">Annuler</button>
+                <a th:href="@{/booking/booking/{id}(id=${id})}" class="btn-detail" style="text-decoration: none; display: inline-block; text-align: center;">Voir détails</a>
             </div>
         </div>
     </div>

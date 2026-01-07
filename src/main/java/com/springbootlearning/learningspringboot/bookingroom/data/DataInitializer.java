@@ -1,6 +1,5 @@
 package com.springbootlearning.learningspringboot.bookingroom.data;
 
-import com.springbootlearning.learningspringboot.bookingroom.RoomService;
 import com.springbootlearning.learningspringboot.bookingroom.model.Role;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
@@ -36,11 +35,13 @@ public class DataInitializer {
 
             List<Room> rooms = new ArrayList<Room>();
 
-            Room room1 = new Room("SOLEIL","zaezaeza",50,"Place THOMAS SANKARA",true,true,true);
-            Room room2 = new Room("FREEDOM","zaezaeza",10,"Place NELSON MANDELA",false,true,true);
+            Room room1 = new Room("SOLEIL", "Une salle lumineuse idéale pour les brainstormings créatifs.", 50, "Bâtiment A, 1er étage", true, true, true);
+            Room room2 = new Room("FREEDOM", "Petite salle calme pour des entretiens ou du travail concentré.", 10, "Bâtiment B, RDC", false, true, true);
+            Room room3 = new Room("JUPITER", "Grande salle de conférence équipée pour la visioconférence.", 100, "Bâtiment C, 5ème étage", true, true, true);
 
             rooms.add(room1);
             rooms.add(room2);
+            rooms.add(room3);
             for(Room room : rooms){
                 if(!roomrepository.existsByName(room.getName())){
                     roomrepository.save(room);

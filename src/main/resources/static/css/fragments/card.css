@@ -66,20 +66,37 @@
 .card .btn-detail {
     background-color: var(--primary);
     color: white;
+    flex: 1;
+    padding: 0.625rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    text-align: center;
 }
 
 .card .btn-detail:hover {
     background-color: var(--primary-hover);
+    color: white;
 }
 
 .card .btn-cancel {
     background-color: var(--bg-main);
     color: var(--text-main);
     border: 1px solid var(--border-color);
+    flex: 1;
+    padding: 0.625rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.875rem;
 }
 
 .card .btn-cancel:hover {
     background-color: #fee2e2;
     color: var(--danger);
     border-color: #fecaca;
+}
+
+[data-theme="dark"] .card .btn-cancel:hover {
+    background-color: rgba(239, 68, 68, 0.2);
 }

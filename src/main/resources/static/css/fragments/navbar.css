@@ -3,12 +3,34 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 5%;
-    background-color: var(--bg-card);
+    background-color: var(--bg-navbar);
     box-shadow: var(--shadow-sm);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 1000;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-card);
+    color: var(--primary);
 }
 
 .logo {
@@ -68,4 +90,20 @@ nav {
 
 .btn-login:hover {
     background-color: var(--primary-hover);
+}
+
+/* Responsive Navbar */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .menu ul {
+        gap: 1rem;
+    }
+    .nav-actions {
+        width: 100%;
+        justify-content: center;
+    }
 }

@@ -15,6 +15,7 @@ main {
     margin-bottom: 2rem;
     font-size: 1.5rem;
     font-weight: 700;
+    color: var(--text-main);
 }
 
 .search-form {
@@ -83,10 +84,20 @@ main {
     margin-bottom: 2rem;
     font-size: 1.5rem;
     font-weight: 700;
+    color: var(--text-main);
 }
 
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
+}
+
+@media (max-width: 640px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .search-form {
+        grid-template-columns: 1fr;
+    }
 }

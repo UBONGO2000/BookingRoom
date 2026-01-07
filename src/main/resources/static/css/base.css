@@ -1,19 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Charte Graphique Modulable */
-    --primary: #4f46e5;         /* Indigo 600 */
-    --primary-hover: #4338ca;   /* Indigo 700 */
-    --secondary: #10b981;       /* Emerald 500 */
-    --secondary-hover: #059669; /* Emerald 600 */
-    --danger: #ef4444;          /* Red 500 */
-    --danger-hover: #dc2626;    /* Red 600 */
+    /* Couleurs de base - Mode Clair */
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --secondary: #10b981;
+    --secondary-hover: #059669;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --warning: #f59e0b;
+    --info: #3b82f6;
     
-    --bg-main: #f8fafc;         /* Slate 50 */
+    --bg-main: #f8fafc;
     --bg-card: #ffffff;
-    --text-main: #1e293b;       /* Slate 800 */
-    --text-muted: #64748b;      /* Slate 500 */
-    --border-color: #e2e8f0;    /* Slate 200 */
+    --bg-navbar: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
     
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -24,6 +27,19 @@
     --radius-lg: 0.75rem;
     
     --font-main: 'Inter', sans-serif;
+}
+
+[data-theme="dark"] {
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    --bg-navbar: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
 }
 
 *, ::before, ::after {
@@ -38,6 +54,71 @@ body {
     font-family: var(--font-main);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Styles Communs des Boutons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--text-muted);
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: var(--text-main);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+}
+.btn-danger:hover {
+    background-color: var(--danger-hover);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+.btn-outline:hover {
+    background-color: var(--bg-card);
+    border-color: var(--text-muted);
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-card);
+    color: var(--primary);
 }
 
 a {
