@@ -101,3 +101,39 @@ main {
         grid-template-columns: 1fr;
     }
 }
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+}
+
+.btn-page {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    color: var(--text-main);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-page:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+}
+
+.btn-page.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}

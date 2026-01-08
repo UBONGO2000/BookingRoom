@@ -6,6 +6,8 @@ import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,30 +34,34 @@ public class BookingController {
 
 
     @GetMapping("/booking")
-    public String booking(Model model, Principal principal){
+    public String booking(Model model, Principal principal, @RequestParam(defaultValue = "0") int page){
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
         }
-        model.addAttribute("rooms",roomService.getAllRooms());
-        model.addAttribute("roomsearch",new RoomSearchDto());
+        Page<Room> roomPage = roomService.getAllRooms(PageRequest.of(page, 6));
+        model.addAttribute("rooms", roomPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", roomPage.getTotalPages());
+        model.addAttribute("roomsearch", new RoomSearchDto());
         return "pages/user/booking";
     }
 
 
     @PostMapping("/booking")
-    public String searchRooms(Model model, @ModelAttribute("roomsearch") RoomSearchDto roomSearchDto, Principal principal) {
+    public String searchRooms(Model model, 
+                              @ModelAttribute("roomsearch") RoomSearchDto roomSearchDto, 
+                              Principal principal,
+                              @RequestParam(defaultValue = "0") int page) {
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
         }
 
-        List<Room> foundRooms = roomService.searchRooms(roomSearchDto);
-        if (foundRooms.isEmpty()) {
-            model.addAttribute("rooms", null); // Pour déclencher le message "aucune salle"
-        } else if (foundRooms.size() == 1) {
-            model.addAttribute("room", foundRooms.get(0));
-        } else {
-            model.addAttribute("rooms", foundRooms);
-        }
+        Page<Room> roomPage = roomService.searchRooms(roomSearchDto, PageRequest.of(page, 6));
+        
+        model.addAttribute("rooms", roomPage.getContent().isEmpty() ? null : roomPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", roomPage.getTotalPages());
+        
         return "pages/user/booking";
     }
 

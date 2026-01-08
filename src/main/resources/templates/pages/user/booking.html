@@ -53,23 +53,33 @@
 
     <!-- Section des résultats -->
     <section class="results-section">
-        <th:block th:if="${room == null && rooms != null}">
+        <th:block th:if="${rooms != null}">
             <h3>Salles disponibles</h3>
             <div class="cards-grid">
                 <th:block th:each="r : ${rooms}">
                     <div th:replace="~{fragments/card :: card(${r.id}, ${r.getName()}, ${r.getCapacity()}, ${r.getLocation()})}"></div>
                 </th:block>
             </div>
-        </th:block>
 
-        <th:block th:if="${room != null}">
-            <h3>Résultat de la recherche</h3>
-            <div class="cards-grid">
-                <div th:replace="~{fragments/card :: card(${room.id}, ${room.getName()}, ${room.getCapacity()}, ${room.getLocation()})}"></div>
+            <!-- Pagination -->
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:if="${currentPage > 0}" 
+                   th:href="@{/booking(page=${currentPage - 1})}" 
+                   class="btn-page">Précédent</a>
+                
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/booking(page=${i})}" 
+                       th:text="${i + 1}" 
+                       th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"></a>
+                </span>
+
+                <a th:if="${currentPage < totalPages - 1}" 
+                   th:href="@{/booking(page=${currentPage + 1})}" 
+                   class="btn-page">Suivant</a>
             </div>
         </th:block>
 
-        <th:block th:if="${room == null && rooms == null}">
+        <th:block th:if="${rooms == null}">
             <div class="no-results">
                 <p>Désolé, aucune salle ne correspond à vos critères.</p>
                 <a th:href="@{/booking}" class="btn-secondary">Voir toutes les salles</a>

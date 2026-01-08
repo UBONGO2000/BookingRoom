@@ -35,13 +35,22 @@ public class DataInitializer {
 
             List<Room> rooms = new ArrayList<Room>();
 
-            Room room1 = new Room("SOLEIL", "Une salle lumineuse idéale pour les brainstormings créatifs.", 50, "Bâtiment A, 1er étage", true, true, true);
-            Room room2 = new Room("FREEDOM", "Petite salle calme pour des entretiens ou du travail concentré.", 10, "Bâtiment B, RDC", false, true, true);
-            Room room3 = new Room("JUPITER", "Grande salle de conférence équipée pour la visioconférence.", 100, "Bâtiment C, 5ème étage", true, true, true);
+            rooms.add(new Room("SOLEIL", "Une salle lumineuse idéale pour les brainstormings créatifs.", 50, "Bâtiment A, 1er étage", true, true, true));
+            rooms.add(new Room("FREEDOM", "Petite salle calme pour des entretiens ou du travail concentré.", 10, "Bâtiment B, RDC", false, true, true));
+            rooms.add(new Room("JUPITER", "Grande salle de conférence équipée pour la visioconférence.", 100, "Bâtiment C, 5ème étage", true, true, true));
+            rooms.add(new Room("MARS", "Salle spacieuse avec une vue imprenable.", 30, "Bâtiment A, 2ème étage", true, true, false));
+            rooms.add(new Room("VENUS", "Ambiance chaleureuse pour vos réunions d'équipe.", 20, "Bâtiment B, 1er étage", false, true, true));
+            rooms.add(new Room("NEPTUNE", "Salle équipée de technologies de pointe.", 15, "Bâtiment C, RDC", true, false, true));
+            rooms.add(new Room("SATURNE", "Idéale pour les grandes présentations.", 80, "Bâtiment D, 3ème étage", true, true, true));
+            rooms.add(new Room("MERCURE", "Petite salle pour des points rapides.", 8, "Bâtiment A, RDC", false, true, false));
+            rooms.add(new Room("URANUS", "Espace créatif avec tableaux blancs partout.", 25, "Bâtiment B, 2ème étage", false, true, true));
+            rooms.add(new Room("PLUTON", "Salle isolée pour une confidentialité maximale.", 12, "Sous-sol, Bâtiment C", false, false, true));
+            rooms.add(new Room("GALAXY", "Immense auditorium pour événements majeurs.", 200, "Bâtiment E, RDC", true, true, true));
+            rooms.add(new Room("ORION", "Salle moderne avec mobilier ergonomique.", 40, "Bâtiment D, 1er étage", true, true, false));
+            rooms.add(new Room("ANDROMEDE", "Espace polyvalent pour ateliers.", 60, "Bâtiment B, 3ème étage", true, true, true));
+            rooms.add(new Room("COSMOS", "Salle avec équipement audio haute fidélité.", 35, "Bâtiment A, 3ème étage", true, false, true));
+            rooms.add(new Room("ZENITH", "Salle au dernier étage, très calme.", 18, "Bâtiment C, 6ème étage", false, true, true));
 
-            rooms.add(room1);
-            rooms.add(room2);
-            rooms.add(room3);
             for(Room room : rooms){
                 if(!roomrepository.existsByName(room.getName())){
                     roomrepository.save(room);
