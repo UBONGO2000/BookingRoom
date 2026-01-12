@@ -156,4 +156,8 @@ public class Room {
     public void setAvailableUntil(LocalDateTime availableUntil) {
         this.availableUntil = availableUntil;
     }
+
+    public boolean isAvailable() {
+        return this.available;
+    }
 }
