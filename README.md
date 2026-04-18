@@ -17,9 +17,9 @@ Application Spring Boot pour la **réservation de salles** avec authentification
 
 ### Fonctionnalités prévues
 
+- [x] API REST initiale pour statistiques et données utilisateur (endpoints `/api/**`).
 - [ ] Système de confirmation par email après réservation (Spring Mail + template Thymeleaf).
 - [ ] Calendrier visuel des réservations (FullCalendar ou équivalent) pour vue mensuelle / hebdo.
-- [ ] API REST pour application mobile (endpoints sécurisés pour login, listes de salles et réservations).
 - [ ] Export des réservations en PDF (iText / Flying Saucer, etc.).
 - [ ] Notifications push (Web Push API ou intégration mobile).
 - [ ] Système d'évaluation des salles (notes, commentaires, moyenne par salle).
@@ -144,13 +144,18 @@ Les comptes suivants sont créés automatiquement au premier lancement :
 - `GET /admin/rooms/edit/{id}` : formulaire modification salle.
 - `GET /admin/rooms/delete/{id}` : supprimer salle.
 
-### Endpoints REST (prévu pour l'API mobile)
+### Documentation API REST
 
-- `POST /api/auth/login` : authentification et récupération d'un token.
-- `GET /api/rooms` : liste paginée / filtrée des salles.
-- `GET /api/rooms/{id}` : détail d'une salle avec évaluations.
-- `GET /api/reservations/me` : réservations de l'utilisateur connecté.
-- `POST /api/reservations` : création d'une réservation mobile.
+Les endpoints API sont sécurisés. L'authentification par session est utilisée, mais le CSRF est désactivé pour les routes `/api/**` afin de faciliter l'intégration mobile.
+
+- `POST /api/auth/login` : Authentification (JSON: `username`, `password`). Retourne un message de succès et le nom d'utilisateur.
+- `GET /api/rooms` : Liste des salles. Paramètres optionnels : `name`, `capacity`, `projector`, `whiteboard`, `videoconferencing`, `page`, `size`.
+- `GET /api/rooms/{id}` : Détail d'une salle avec placeholder pour les évaluations.
+- `GET /api/reservations/me` (ou `/api/my-bookings`) : Liste des réservations de l'utilisateur connecté.
+- `POST /api/reservations` : Créer une réservation. JSON: `title`, `startTime`, `endTime`, `roomId`. Les dates doivent être au format ISO (ex: `2026-04-18T14:00:00`).
+- `GET /api/stats/overview` : Vue d'ensemble des statistiques de l'application.
+- `GET /api/rooms/available-now` : Salles disponibles immédiatement pour 1h.
+- `GET /api/me` : Informations du profil connecté.
 
 ***
 
@@ -158,18 +163,18 @@ Les comptes suivants sont créés automatiquement au premier lancement :
 
 ### Mesures implémentées
 
+- **Protection CSRF** : Réactivée pour sécuriser les formulaires contre les attaques de type Cross-Site Request Forgery.
+- **Gestion Globale des Erreurs** : Utilisation de `@ControllerAdvice` pour capturer les exceptions et afficher des pages d'erreur personnalisées.
 - **Chiffrement des mots de passe** : BCrypt avec salt automatique.
 - **Gestion des rôles** : USER et ADMIN avec séparation stricte des routes.
 - **Validation des formulaires** : Spring Validation sur User, Room et Booking.
 - **Politique de mot de passe** : complexité minimale requise.
-- **Vérification d'unicité** : username et email uniques en base.
 - **Logout sécurisé** : invalidation de session et suppression des cookies.
 
 ### Recommandations pour la production
 
 - Activer HTTPS.
 - Implémenter une protection contre les attaques Brute Force (rate limiting).
-- Activer CSRF avec tokens Thymeleaf.
 - Configurer des headers de sécurité supplémentaires (HSTS, CSP, etc.).
 - Utiliser une base de données PostgreSQL en production (pas H2).
 
