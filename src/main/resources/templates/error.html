@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur - RoomBooker</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 5rem auto;
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #ef4444;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+        p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        .btn-home {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .btn-home:hover {
+            background: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h1>Oups ! Quelque chose s'est mal passé</h1>
+        <p th:text="${errorMessage}">Une erreur inattendue est survenue.</p>
+        <a th:href="@{/}" class="btn-home">Retour à l'accueil</a>
+    </div>
+</main>
+
+</body>
+</html>

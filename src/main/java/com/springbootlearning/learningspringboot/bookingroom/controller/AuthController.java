@@ -3,9 +3,11 @@ package com.springbootlearning.learningspringboot.bookingroom.controller;
 import com.springbootlearning.learningspringboot.bookingroom.dto.UserDto;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +35,23 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") User user) {
+    public String registerUser(@Valid @ModelAttribute("user") User user, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "pages/auth/register";
+        }
+        
+        // Check if username already exists
+        if (userService.findByUsername(user.getUsername()).isPresent()) {
+            model.addAttribute("usernameError", "Ce nom d'utilisateur est deja utilise");
+            return "pages/auth/register";
+        }
+        
+        // Check if email already exists
+        if (userService.findByEmail(user.getEmail()).isPresent()) {
+            model.addAttribute("emailError", "Cette adresse email est deja utilisee");
+            return "pages/auth/register";
+        }
+        
         userService.register(
                 user.getFirstname(),
                 user.getLastname(),
@@ -41,6 +59,6 @@ public class AuthController {
                 user.getEmail(),
                 passwordEncoder.encode(user.getPassword())
         );
-        return "redirect:/login";
+        return "redirect:/login?registered";
     }
 }

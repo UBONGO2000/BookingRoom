@@ -2,7 +2,11 @@ package com.springbootlearning.learningspringboot.bookingroom.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.Length;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +18,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Le prenom est obligatoire")
+    @Length(min = 2, max = 50, message = "Le prenom doit contenir entre 2 et 50 caracteres")
     @Column(nullable = false)
     private String firstname;
 
+    @NotBlank(message = "Le nom est obligatoire")
+    @Length(min = 2, max = 50, message = "Le nom doit contenir entre 2 et 50 caracteres")
     @Column(nullable = false)
     private String lastname;
 
+    @NotBlank(message = "Le nom d'utilisateur est obligatoire")
+    @Length(min = 3, max = 30, message = "Le nom d'utilisateur doit contenir entre 3 et 30 caracteres")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Le nom d'utilisateur ne peut contenir que des lettres, chiffres et underscores")
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -27,9 +38,15 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "L'email doit etre valide")
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotBlank(message = "Le mot de passe est obligatoire")
+    @Length(min = 8, max = 100, message = "Le mot de passe doit contenir entre 8 et 100 caracteres")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+", 
+             message = "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractere special")
     @Column(nullable = false)
     private String password;
 

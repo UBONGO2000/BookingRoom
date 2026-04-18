@@ -2,6 +2,9 @@ package com.springbootlearning.learningspringboot.bookingroom.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,15 +17,22 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Le nom de la salle est obligatoire")
+    @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caracteres")
     @Column(nullable = false,unique = true)
     private String name;
 
+    @Size(max = 1000, message = "La description ne peut pas depasser 1000 caracteres")
     @Column(length = 1000)
     private String description;
 
+    @NotBlank(message = "La capacite est obligatoire")
+    @Min(value = 1, message = "La capacite doit etre au moins 1")
     @Column(nullable = false)
     private Integer capacity;
 
+    @NotBlank(message = "L'emplacement est obligatoire")
+    @Size(max = 200, message = "L'emplacement ne peut pas depasser 200 caracteres")
     @Column(nullable = false)
     private String location;
 

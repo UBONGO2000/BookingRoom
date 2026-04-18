@@ -20,12 +20,11 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(
                 auth ->auth
-                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/dashboard", "/booking/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
         )
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
         .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .formLogin(
                         form -> form
@@ -34,6 +33,13 @@ public class SecurityConfig {
                                 .defaultSuccessUrl("/dashboard", true)
                                 .failureUrl("/login?error")
                                 .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 );
         return http.build();
     }

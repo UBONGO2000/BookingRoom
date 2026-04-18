@@ -1,6 +1,9 @@
 package com.springbootlearning.learningspringboot.bookingroom.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,12 +15,16 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Le titre de la reservation est obligatoire")
+    @Size(min = 3, max = 200, message = "Le titre doit contenir entre 3 et 200 caracteres")
     @Column(nullable = false)
     private String title;
 
+    @NotNull(message = "L'heure de debut est obligatoire")
     @Column(nullable = false)
     private LocalDateTime startTime;
 
+    @NotNull(message = "L'heure de fin est obligatoire")
     @Column(nullable = false)
     private LocalDateTime endTime;
 

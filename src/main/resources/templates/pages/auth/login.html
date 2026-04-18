@@ -13,8 +13,19 @@
     <h2>Bon retour !</h2>
     <p>Connectez-vous pour gérer vos réservations.</p>
 
+    <!-- Message de déconnexion -->
+    <div th:if="${param.logout}" class="success-msg" style="color: #22c55e; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+        Vous avez été déconnecté avec succès.
+    </div>
+
+    <!-- Message d'erreur -->
     <div th:if="${param.error}" class="error-msg" style="color: #ef4444; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
         Identifiants invalides.
+    </div>
+
+    <!-- Message d'inscription réussie -->
+    <div th:if="${param.registered}" class="success-msg" style="color: #22c55e; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+        Inscription réussie ! Veuillez vous connecter.
     </div>
 
     <form th:action="@{/login}" method="post">

@@ -13,6 +13,10 @@
     <h2>Créer un compte</h2>
     <p>Rejoignez RoomBooker pour réserver vos espaces.</p>
 
+    <!-- Messages d'erreur globaux -->
+    <div th:if="${usernameError}" class="alert alert-error" th:text="${usernameError}"></div>
+    <div th:if="${emailError}" class="alert alert-error" th:text="${emailError}"></div>
+
     <form th:action="@{/register}" method="post" th:object="${user}">
 
         <div class="name-row">
@@ -20,24 +24,24 @@
             <div class="input-group">
                 <label for="firstname">Prénom</label>
                 <div class="input-wrapper">
-                    <!-- Icône Personne -->
                     <svg viewBox="0 0 24 24">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
-                    <input type="text" id="firstname" name="firstname" placeholder="Jean" required autocomplete="given-name" th:field="*{firstname}">
+                    <input type="text" id="firstname" name="firstname" placeholder="Jean" autocomplete="given-name" th:field="*{firstname}">
                 </div>
+                <span th:if="${#fields.hasErrors('firstname')}" class="error-message" th:errors="*{firstname}"></span>
             </div>
 
             <!-- Lastname -->
             <div class="input-group">
                 <label for="lastname">Nom</label>
                 <div class="input-wrapper">
-                    <!-- Icône Badge/ID -->
                     <svg viewBox="0 0 24 24">
                         <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10 0h2v2h-2zm-6-4h8v2h-8z"/>
                     </svg>
-                    <input type="text" id="lastname" name="lastname" placeholder="Dupont" required autocomplete="family-name">
+                    <input type="text" id="lastname" name="lastname" placeholder="Dupont" autocomplete="family-name" th:field="*{lastname}">
                 </div>
+                <span th:if="${#fields.hasErrors('lastname')}" class="error-message" th:errors="*{lastname}"></span>
             </div>
         </div>
 
@@ -48,32 +52,34 @@
                 <svg viewBox="0 0 24 24">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
-                <input type="text" id="username" name="username" placeholder="jean.dupont24" required autocomplete="username">
+                <input type="text" id="username" name="username" placeholder="jean.dupont24" autocomplete="username" th:field="*{username}">
             </div>
+            <span th:if="${#fields.hasErrors('username')}" class="error-message" th:errors="*{username}"></span>
         </div>
 
         <!-- Email -->
         <div class="input-group">
             <label for="email">Adresse Email</label>
             <div class="input-wrapper">
-                <!-- Icône Email/Enveloppe -->
                 <svg viewBox="0 0 24 24">
                     <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
-                <input type="email" id="email" name="email" placeholder="jean@exemple.com" required autocomplete="email">
+                <input type="email" id="email" name="email" placeholder="jean@exemple.com" autocomplete="email" th:field="*{email}">
             </div>
+            <span th:if="${#fields.hasErrors('email')}" class="error-message" th:errors="*{email}"></span>
         </div>
 
         <!-- Password -->
         <div class="input-group">
             <label for="password">Mot de passe</label>
             <div class="input-wrapper">
-                <!-- Icône Cadenas -->
                 <svg viewBox="0 0 24 24">
                     <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3 3.1-3 1.71 0 3.1 1.29 3.1 3v2z"/>
                 </svg>
-                <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password">
+                <input type="password" id="password" name="password" placeholder="Min. 8 caractères" autocomplete="new-password" th:field="*{password}">
             </div>
+            <span th:if="${#fields.hasErrors('password')}" class="error-message" th:errors="*{password}"></span>
+            <small class="help-text">Au moins: 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial</small>
         </div>
 
         <button type="submit">S'inscrire</button>
