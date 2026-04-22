@@ -6,7 +6,7 @@
     align-items: center;
     text-align: center;
     padding: 0 5%;
-    background: linear-gradient(rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.9)), url('/images/img.png');
+    background: linear-gradient(rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.9)), url('./static/images/img.png');
     background-size: cover;
     background-position: center;
 }
