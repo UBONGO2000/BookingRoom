@@ -6,10 +6,8 @@ import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
@@ -33,6 +31,8 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initDatabase(RoomRepository roomrepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
+            seedDefaultUser("jean", "paul", "admin", "admin@gmail.com", "Admin@123", Role.ADMIN);
+            seedDefaultUser("jacque", "pierre", "user", "user@gmail.com", "User@123", Role.USER);
 
             List<Room> rooms = new ArrayList<Room>();
 
@@ -58,13 +58,6 @@ public class DataInitializer {
                 }
             }
         };
-    }
-
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void seedUsers() {
-        seedDefaultUser("jean", "paul", "admin", "admin@gmail.com", "Admin@123", Role.ADMIN);
-        seedDefaultUser("jacque", "pierre", "user", "user@gmail.com", "User@123", Role.USER);
     }
 
     private void seedDefaultUser(String firstname, String lastname, String username, String email, String rawPassword, Role role) {
