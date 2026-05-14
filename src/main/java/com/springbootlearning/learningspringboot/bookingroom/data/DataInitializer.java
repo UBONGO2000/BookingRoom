@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class DataInitializer {
@@ -62,29 +63,43 @@ public class DataInitializer {
 
     @EventListener(ApplicationReadyEvent.class)
     public void seedUsers() {
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            User admin = new User(
-                    "jean",
-                    "paul",
-                    "admin",
-                    "admin@gmail.com",
-                    passwordEncoder.encode("Admin@123"),
-                    Role.ADMIN
-            );
-            userRepository.save(admin);
-            System.out.println("✅ Admin user created.");
-        }
+        seedDefaultUser("jean", "paul", "admin", "admin@gmail.com", "Admin@123", Role.ADMIN);
+        seedDefaultUser("jacque", "pierre", "user", "user@gmail.com", "User@123", Role.USER);
+    }
 
-        if (userRepository.findByUsername("user").isEmpty()) {
+    private void seedDefaultUser(String firstname, String lastname, String username, String email, String rawPassword, Role role) {
+        Optional<User> existingUser = userRepository.findByUsername(username);
+
+        if (existingUser.isEmpty()) {
             User user = new User(
-                    "jacque",
-                    "pierre",
-                    "user",
-                    "user@gmail.com",
-                    passwordEncoder.encode("User@123")
+                    firstname,
+                    lastname,
+                    username,
+                    email,
+                    passwordEncoder.encode(rawPassword),
+                    role
             );
             userRepository.save(user);
-            System.out.println("✅ Standard user created.");
+            System.out.println("Default user created: " + username);
+            return;
+        }
+
+        User user = existingUser.get();
+        boolean updated = false;
+
+        if (user.getRole() != role) {
+            user.setRole(role);
+            updated = true;
+        }
+
+        if (user.getPassword() == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            updated = true;
+        }
+
+        if (updated) {
+            userRepository.save(user);
+            System.out.println("Default user updated: " + username);
         }
     }
 
