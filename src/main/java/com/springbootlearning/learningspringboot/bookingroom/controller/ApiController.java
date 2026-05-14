@@ -9,6 +9,8 @@ import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepo
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -51,7 +54,8 @@ public class ApiController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials,
+                                                     HttpServletRequest request) {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
@@ -59,6 +63,11 @@ public class ApiController {
                 new UsernamePasswordAuthenticationToken(username, password)
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        HttpSession session = request.getSession(true);
+        session.setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext()
+        );
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Authentification réussie");

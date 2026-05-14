@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +45,8 @@ public class User {
     private String email;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
-    @Length(min = 8, max = 100, message = "Le mot de passe doit contenir entre 8 et 100 caracteres")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+", 
-             message = "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractere special")
-    @Column(nullable = false)
+    @Size(max = 100, message = "Le mot de passe stocke ne doit pas depasser 100 caracteres")
+    @Column(nullable = false, length = 100)
     private String password;
 
     @Enumerated(EnumType.STRING)

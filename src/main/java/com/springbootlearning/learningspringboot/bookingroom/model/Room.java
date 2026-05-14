@@ -4,6 +4,7 @@ package com.springbootlearning.learningspringboot.bookingroom.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public class Room {
     @Column(length = 1000)
     private String description;
 
-    @NotBlank(message = "La capacite est obligatoire")
+    @NotNull(message = "La capacite est obligatoire")
     @Min(value = 1, message = "La capacite doit etre au moins 1")
     @Column(nullable = false)
     private Integer capacity;
