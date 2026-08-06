@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class Room {
     private LocalDateTime availableUntil;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore // GET /api/rooms renvoie des Room bruts : sans ca, chaque booking (donc son user, donc son password) fuiterait dans le JSON
     private List<Booking> bookings =new ArrayList<Booking>();
 
 

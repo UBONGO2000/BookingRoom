@@ -3,6 +3,7 @@ package com.springbootlearning.learningspringboot.bookingroom.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -47,6 +48,7 @@ public class User {
     @NotBlank(message = "Le mot de passe est obligatoire")
     @Size(max = 100, message = "Le mot de passe stocke ne doit pas depasser 100 caracteres")
     @Column(nullable = false, length = 100)
+    @JsonIgnore // le hash bcrypt ne doit JAMAIS apparaitre dans une reponse JSON
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +56,7 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore // sans ca, Jackson tente de suivre user -> bookings -> room -> bookings -> user -> ... en boucle
     private List<Booking> bookings = new ArrayList<Booking>();
 
 
