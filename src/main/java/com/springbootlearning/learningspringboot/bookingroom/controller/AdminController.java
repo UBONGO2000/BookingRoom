@@ -62,13 +62,13 @@ public class AdminController {
         return "pages/admin/room-form";
     }
 
-    @GetMapping("/rooms/delete/{id}")
+    @PostMapping("/rooms/delete/{id}")
     public String deleteRoom(@PathVariable Long id) {
         roomService.deleteRoom(id);
         return "redirect:/admin";
     }
 
-    @GetMapping("/rooms/toggle-availability/{id}")
+    @PostMapping("/rooms/toggle-availability/{id}")
     public String toggleAvailability(@PathVariable Long id) {
         roomService.getRoomById(id).ifPresent(room -> {
             roomService.updateRoomAvailability(id, !room.getAvailable());
