@@ -7,14 +7,6 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/booking.css}">
-    <style>
-        .form-container { max-width: 600px; margin: 2rem auto; background: var(--bg-card); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-md); color: var(--text-main); }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); color: var(--text-main); }
-        .checkbox-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
-        .checkbox-item { display: flex; align-items: center; gap: 0.5rem; }
-    </style>
 </head>
 <body>
 
@@ -65,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 1rem;">
+            <div class="form-group form-group--spaced">
                 <label for="availableFrom">Disponible à partir de</label>
                 <input type="datetime-local" id="availableFrom" th:field="*{availableFrom}">
             </div>
@@ -75,7 +67,7 @@
                 <input type="datetime-local" id="availableUntil" th:field="*{availableUntil}">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Enregistrer</button>
+            <button type="submit" class="btn btn-primary btn-submit-block">Enregistrer</button>
         </form>
     </div>
 </main>

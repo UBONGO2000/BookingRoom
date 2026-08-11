@@ -19,7 +19,7 @@
             </button>
             <div class="profile" th:if="${user != null}">
                 <span th:text="${'Hello, ' + user.firstname}">Hello, User</span>
-                <form th:action="@{/logout}" method="post" style="display: inline;">
+                <form th:action="@{/logout}" method="post" class="logout-form">
                     <button type="submit" class="btn-logout">Déconnexion</button>
                 </form>
             </div>
