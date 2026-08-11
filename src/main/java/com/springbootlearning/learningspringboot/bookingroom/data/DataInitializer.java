@@ -5,6 +5,9 @@ import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +20,32 @@ import java.util.Optional;
 @Configuration
 public class DataInitializer {
 
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
     private  RoomRepository roomrepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
+    @Value("${app.seed.default-users.enabled:true}")
+    private boolean seedDefaultUsersEnabled;
+
+    @Value("${app.seed.default-users.admin-username:admin}")
+    private String adminUsername;
+
+    @Value("${app.seed.default-users.admin-email:admin@gmail.com}")
+    private String adminEmail;
+
+    @Value("${app.seed.default-users.admin-password:Admin@123}")
+    private String adminPassword;
+
+    @Value("${app.seed.default-users.user-username:user}")
+    private String userUsername;
+
+    @Value("${app.seed.default-users.user-email:user@gmail.com}")
+    private String userEmail;
+
+    @Value("${app.seed.default-users.user-password:User@123}")
+    private String userPassword;
 
     public DataInitializer(RoomRepository roomrepository, PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.roomrepository = roomrepository;
@@ -31,8 +56,11 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initDatabase(RoomRepository roomrepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            seedDefaultUser("jean", "paul", "admin", "admin@gmail.com", "Admin@123", Role.ADMIN);
-            seedDefaultUser("jacque", "pierre", "user", "user@gmail.com", "User@123", Role.USER);
+            if (seedDefaultUsersEnabled) {
+                log.warn("Seeding default accounts ({}, {}) - set SEED_DEFAULT_USERS=false in production", adminUsername, userUsername);
+                seedDefaultUser("jean", "paul", adminUsername, adminEmail, adminPassword, Role.ADMIN);
+                seedDefaultUser("jacque", "pierre", userUsername, userEmail, userPassword, Role.USER);
+            }
 
             List<Room> rooms = new ArrayList<Room>();
 
@@ -78,21 +106,11 @@ public class DataInitializer {
         }
 
         User user = existingUser.get();
-        boolean updated = false;
 
         if (user.getRole() != role) {
             user.setRole(role);
-            updated = true;
-        }
-
-        if (user.getPassword() == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(rawPassword));
-            updated = true;
-        }
-
-        if (updated) {
             userRepository.save(user);
-            System.out.println("Default user updated: " + username);
+            System.out.println("Default user role updated: " + username);
         }
     }
 
