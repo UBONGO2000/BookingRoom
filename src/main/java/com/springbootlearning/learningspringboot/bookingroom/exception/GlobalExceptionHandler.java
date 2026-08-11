@@ -1,5 +1,9 @@
 package com.springbootlearning.learningspringboot.bookingroom.exception;
 
+import com.springbootlearning.learningspringboot.bookingroom.controller.AdminController;
+import com.springbootlearning.learningspringboot.bookingroom.controller.AuthController;
+import com.springbootlearning.learningspringboot.bookingroom.controller.BookingController;
+import com.springbootlearning.learningspringboot.bookingroom.controller.HomeController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -7,7 +11,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-@ControllerAdvice
+// Scoped to the HTML page controllers only - ApiController (REST) has its own
+// ApiExceptionHandler so API clients get JSON errors instead of the "error" view.
+@ControllerAdvice(assignableTypes = {
+        AuthController.class,
+        AdminController.class,
+        BookingController.class,
+        HomeController.class
+})
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
