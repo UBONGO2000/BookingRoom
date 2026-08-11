@@ -7,25 +7,6 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/booking.css}">
-    <style>
-        .detail-container { max-width: 1000px; margin: 2rem auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow); color: var(--text-main); }
-        .room-info h1 { margin-bottom: 1rem; color: var(--text-main); }
-        .room-info p { margin-bottom: 0.5rem; color: var(--text-muted); }
-        .equipment { display: flex; gap: 1rem; margin-top: 1rem; }
-        .eq-item { background: var(--bg-main); padding: 5px 12px; border-radius: 20px; font-size: 0.875rem; display: flex; align-items: center; gap: 5px; color: var(--text-main); border: 1px solid var(--border-color); }
-        .booking-form { background: var(--bg-main); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); }
-        .booking-form h2 { margin-bottom: 1rem; font-size: 1.25rem; color: var(--text-main); }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.3rem; font-size: 0.875rem; color: var(--text-main); }
-        .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-card); color: var(--text-main); }
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
-        .btn-confirm:hover { background: var(--primary-hover); }
-        .btn-confirm:disabled { background: var(--text-muted); cursor: not-allowed; opacity: 0.6; }
-        .existing-bookings { margin-top: 2rem; }
-        .existing-bookings h3 { margin-bottom: 1rem; color: var(--text-main); }
-        .booking-item { padding: 10px; border-bottom: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-main); }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.875rem; margin-bottom: 1rem; }
-    </style>
 </head>
 <body>
 
@@ -34,8 +15,8 @@
 <main>
     <div class="detail-container">
         <div class="room-info">
-            <span th:if="${room.available}" class="status-badge" style="background: #dcfce7; color: #166534;">Disponible</span>
-            <span th:unless="${room.available}" class="status-badge" style="background: #fee2e2; color: #991b1b;">Maintenance</span>
+            <span th:if="${room.available}" class="status-badge status-badge--available">Disponible</span>
+            <span th:unless="${room.available}" class="status-badge status-badge--maintenance">Maintenance</span>
             
             <h1 th:text="${room.name}">Nom de la salle</h1>
             <p><strong>Localisation :</strong> <span th:text="${room.location}">Localisation</span></p>
@@ -60,7 +41,7 @@
 
         <div class="booking-form">
             <h2>Réserver cette salle</h2>
-            <div th:if="${errorMessage}" style="background: var(--danger); color: white; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;" th:text="${errorMessage}">
+            <div th:if="${errorMessage}" class="booking-error" th:text="${errorMessage}">
                 Erreur lors de la réservation.
             </div>
             <form th:action="@{/booking/confirm}" method="post">
@@ -79,7 +60,7 @@
                 </div>
                 <button type="submit" class="btn-confirm" th:disabled="${!room.available}">Confirmer la réservation</button>
             </form>
-            <p th:unless="${room.available}" style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem;">Cette salle est actuellement fermée aux réservations.</p>
+            <p th:unless="${room.available}" class="room-closed-notice">Cette salle est actuellement fermée aux réservations.</p>
         </div>
     </div>
 </main>

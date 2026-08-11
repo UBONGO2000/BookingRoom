@@ -54,6 +54,16 @@
     margin-top: 1.5rem;
 }
 
+/* Le bouton "Annuler" est enveloppé dans un <form> pour la protection CSRF :
+   c'est ce form qui doit devenir l'element flex, pas le bouton lui-meme. */
+.card .action form {
+    flex: 1;
+}
+
+.card .action form button {
+    width: 100%;
+}
+
 .card button {
     flex: 1;
     padding: 0.625rem;
@@ -73,6 +83,8 @@
     font-size: 0.875rem;
     border: none;
     text-align: center;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .card .btn-detail:hover {

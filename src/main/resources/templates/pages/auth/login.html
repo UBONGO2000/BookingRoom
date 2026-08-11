@@ -14,22 +14,22 @@
     <p>Connectez-vous pour gérer vos réservations.</p>
 
     <!-- Message de déconnexion -->
-    <div th:if="${param.logout}" class="success-msg" style="color: #22c55e; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+    <div th:if="${param.logout}" class="alert alert-success">
         Vous avez été déconnecté avec succès.
     </div>
 
     <!-- Message d'erreur -->
-    <div th:if="${param.error}" class="error-msg" style="color: #ef4444; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+    <div th:if="${param.error}" class="alert alert-error">
         Identifiants invalides.
     </div>
 
     <!-- Message de verrouillage temporaire -->
-    <div th:if="${param.locked}" class="error-msg" style="color: #ef4444; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+    <div th:if="${param.locked}" class="alert alert-error">
         Trop de tentatives échouées. Réessayez dans quelques minutes.
     </div>
 
     <!-- Message d'inscription réussie -->
-    <div th:if="${param.registered}" class="success-msg" style="color: #22c55e; margin-bottom: 1rem; font-size: 0.875rem; font-weight: 500;">
+    <div th:if="${param.registered}" class="alert alert-success">
         Inscription réussie ! Veuillez vous connecter.
     </div>
 
