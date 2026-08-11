@@ -7,6 +7,7 @@ import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
+import com.springbootlearning.learningspringboot.bookingroom.security.LoginAttemptService;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
@@ -38,19 +40,22 @@ public class ApiController {
     private final BookingService bookingService;
     private final RoomService roomService;
     private final AuthenticationManager authenticationManager;
+    private final LoginAttemptService loginAttemptService;
 
-    public ApiController(RoomRepository roomRepository, 
-                         BookingRepository bookingRepository, 
+    public ApiController(RoomRepository roomRepository,
+                         BookingRepository bookingRepository,
                          UserRepository userRepository,
                          BookingService bookingService,
                          RoomService roomService,
-                         AuthenticationManager authenticationManager) {
+                         AuthenticationManager authenticationManager,
+                         LoginAttemptService loginAttemptService) {
         this.roomRepository = roomRepository;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.bookingService = bookingService;
         this.roomService = roomService;
         this.authenticationManager = authenticationManager;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @PostMapping("/auth/login")
@@ -59,9 +64,25 @@ public class ApiController {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
+        if (username != null && loginAttemptService.isBlocked(username)) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Trop de tentatives échouées. Réessayez plus tard.");
+            return ResponseEntity.status(429).body(error);
+        }
+
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
+        } catch (AuthenticationException e) {
+            loginAttemptService.recordFailure(username);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Identifiants invalides");
+            return ResponseEntity.status(401).body(error);
+        }
+
+        loginAttemptService.recordSuccess(username);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         HttpSession session = request.getSession(true);
         session.setAttribute(
