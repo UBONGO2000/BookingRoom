@@ -1,5 +1,9 @@
 package com.springbootlearning.learningspringboot.bookingroom.config;
 
+import com.springbootlearning.learningspringboot.bookingroom.security.LoginAttemptService;
+import com.springbootlearning.learningspringboot.bookingroom.security.LoginRateLimitFilter;
+import com.springbootlearning.learningspringboot.bookingroom.security.RateLimitingAuthenticationFailureHandler;
+import com.springbootlearning.learningspringboot.bookingroom.security.RateLimitingAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,9 +12,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
+
+    private final LoginAttemptService loginAttemptService;
+
+    public SecurityConfig(LoginAttemptService loginAttemptService) {
+        this.loginAttemptService = loginAttemptService;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -25,6 +36,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
+                .addFilterBefore(new LoginRateLimitFilter(loginAttemptService), UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/api/**")
                 )
@@ -42,8 +54,8 @@ public class SecurityConfig {
                         form -> form
                                 .loginPage("/login")
                                 .loginProcessingUrl("/login")
-                                .defaultSuccessUrl("/dashboard", true)
-                                .failureUrl("/login?error")
+                                .successHandler(new RateLimitingAuthenticationSuccessHandler(loginAttemptService))
+                                .failureHandler(new RateLimitingAuthenticationFailureHandler(loginAttemptService))
                                 .permitAll()
                 )
                 .logout(logout -> logout
