@@ -51,7 +51,7 @@ Architecture en couches assez classique pour du Spring Boot :
 - **Frontend** : Thymeleaf + CSS fait main (pas de Bootstrap ni Tailwind).
 - **Base de données** : PostgreSQL (H2 en mémoire pour les tests).
 - **Conteneurisation** : Docker.
-- **Tests** : JUnit 5, Spring Boot Test, Mockito, MockMvc — sur les services et sur les contrôleurs (rôles, autorisations, protection contre l'IDOR sur les réservations).
+- **Tests** : JUnit 5, Spring Boot Test, Mockito, MockMvc, JaCoCo pour la couverture — sur les services et sur les contrôleurs (rôles, autorisations, protection contre l'IDOR sur les réservations).
 
 ***
 
@@ -163,9 +163,15 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-Deux niveaux de couverture :
-- **Services** : logique métier (recherche de salles, création de réservation, règles de disponibilité...).
-- **Contrôleurs** (MockMvc) : je vérifie en particulier deux choses faciles à casser sans s'en rendre compte — que les routes admin refusent bien un utilisateur non-admin, et qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR).
+57 tests répartis sur 10 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+
+| Périmètre | Instructions | Lignes |
+|---|---|---|
+| Ensemble du projet | 61,5 % | 59,0 % |
+| Couche service | 84,9 % | 96,6 % |
+| Couche contrôleur | 25,8 % | 30,0 % |
+
+La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité). Les contrôleurs le sont beaucoup moins pour l'instant — j'ai ciblé volontairement les deux points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, et qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR). `AuthController` et `HomeController` n'ont pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
 
 ***
 
