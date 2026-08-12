@@ -16,6 +16,7 @@ import java.security.Principal;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping
@@ -68,13 +69,16 @@ public class BookingController {
 
     @GetMapping("/booking/{id}")
     public String bookingDetail(@PathVariable Long id, Model model, Principal principal, @RequestParam(required = false) String error) {
+        Optional<Room> room = roomService.getRoomById(id);
+        if (room.isEmpty()) {
+            return "redirect:/booking";
+        }
+
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
         }
-        roomService.getRoomById(id).ifPresent(room -> {
-            model.addAttribute("room", room);
-            model.addAttribute("bookings", bookingService.getBookingsByRoom(room));
-        });
+        model.addAttribute("room", room.get());
+        model.addAttribute("bookings", bookingService.getBookingsByRoom(room.get()));
         if (error != null) {
             model.addAttribute("errorMessage", error);
         }
