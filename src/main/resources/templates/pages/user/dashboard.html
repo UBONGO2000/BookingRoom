@@ -22,10 +22,18 @@
     <section class="reservation">
         <h2 class="section-title">Vos Réservations à Venir</h2>
 
-        <div class="cards-grid">
-            <th:block th:if="${#lists.isEmpty(bookings)}">
-                <p>Vous n'avez pas encore de réservations.</p>
-            </th:block>
+        <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                </svg>
+            </div>
+            <h3>Aucune réservation pour le moment</h3>
+            <p>Trouvez une salle disponible et réservez votre premier créneau en quelques secondes.</p>
+            <a th:href="@{/booking}" class="btn btn-primary">Réserver une salle</a>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(bookings)}" class="cards-grid">
             <th:block th:each="b : ${bookings}">
                 <div class="container">
                     <div class="card">

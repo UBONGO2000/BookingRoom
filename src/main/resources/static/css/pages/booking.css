@@ -102,14 +102,6 @@ main {
     }
 }
 
-.no-results {
-    text-align: center;
-    padding: 3rem;
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-}
-
 .pagination {
     display: flex;
     justify-content: center;
