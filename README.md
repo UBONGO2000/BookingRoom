@@ -1,189 +1,180 @@
 # BookingRoom
 
-Application Spring Boot pour la **réservation de salles** avec authentification sécurisée, espace administrateur, gestion des réservations et recherche avancée. Stack : Java 17, Spring Security, Thymeleaf, PostgreSQL, Docker et tests automatisés.
+Un projet Spring Boot que j'ai monté pour progresser sur l'écosystème Spring (Security, Data JPA, Thymeleaf...) en construisant quelque chose d'un peu plus consistant qu'un CRUD de démo : un outil de réservation de salles de réunion, avec comptes utilisateurs, espace admin, et une vraie couche de sécurité derrière.
+
+Stack : Java 17, Spring Boot, Spring Security, Thymeleaf, PostgreSQL, Docker, tests automatisés.
 
 ***
 
-## Fonctionnalités
+## Ce que ça fait
 
-- Authentification et gestion des utilisateurs avec rôles (utilisateur / administrateur).
-- Gestion des salles : création, modification, suppression, capacité et équipements.
-- Gestion des réservations : création, consultation, annulation par l'utilisateur et validation par l'admin.
-- Recherche avancée des salles par date, créneau horaire, capacité et caractéristiques.
-- Interface web côté serveur rendue avec **Thymeleaf** (formulaires, listes, vues de détail).
-- Persistance des données avec **PostgreSQL**, configuration possible via Docker.
-- Validation des formulaires avec Spring Validation.
-- Politique de mot de passe renforcée (majuscule, minuscule, chiffre, caractère spécial).
+- Connexion / inscription, avec deux rôles : utilisateur et administrateur.
+- Gestion des salles côté admin : création, modification, suppression, équipements (projecteur, tableau blanc, visioconférence).
+- Réservation côté utilisateur : recherche par capacité/équipement, réservation d'un créneau, annulation.
+- L'admin voit et peut annuler n'importe quelle réservation, avec un filtre par salle ou par utilisateur.
+- Rendu entièrement côté serveur avec Thymeleaf — pas de framework JS, tout est généré par le backend.
+- Politique de mot de passe assez stricte à l'inscription (majuscule, minuscule, chiffre, caractère spécial).
 
-### Fonctionnalités prévues
+### Sur ma liste, pas encore fait
 
-- [x] API REST initiale pour statistiques et données utilisateur (endpoints `/api/**`).
-- [ ] Système de confirmation par email après réservation (Spring Mail + template Thymeleaf).
-- [ ] Calendrier visuel des réservations (FullCalendar ou équivalent) pour vue mensuelle / hebdo.
-- [ ] Export des réservations en PDF (iText / Flying Saucer, etc.).
-- [ ] Notifications push (Web Push API ou intégration mobile).
-- [ ] Système d'évaluation des salles (notes, commentaires, moyenne par salle).
+- [x] Une petite API REST (`/api/**`) pour les stats et les données utilisateur — déjà en place.
+- [ ] Confirmation par email après une réservation.
+- [ ] Un vrai calendrier visuel (FullCalendar ou équivalent) plutôt qu'une simple liste.
+- [ ] Export PDF d'une réservation.
+- [ ] Notifications push — franchement pas prioritaire pour un outil de cette échelle, je le laisse en bas de la pile.
+- [ ] Notes/avis sur les salles (l'API a déjà un placeholder qui attend cette fonctionnalité).
 
 ***
 
-## Architecture du projet
+## Comment c'est organisé
 
-### Organisation générale
+Architecture en couches assez classique pour du Spring Boot :
 
-Le projet suit une architecture en couches classique Spring Boot :
+- `controller` — les endpoints, web (Thymeleaf) et REST.
+- `service` — la logique métier (réservations, salles, utilisateurs).
+- `repository` — les interfaces Spring Data JPA.
+- `model` — les entités JPA (`User`, `Room`, `Booking`...).
+- `dto` — les objets utilisés pour les formulaires et les réponses JSON.
+- `security` — la partie anti brute-force sur le login (filtre + service de verrouillage).
 
-- **config** : configuration Spring (sécurité, CORS, mail, etc.).
-- **controller** : contrôleurs MVC (endpoints web / REST).
-- **service** : logique métier (réservations, salles, utilisateurs).
-- **repository** : interfaces JPA pour l'accès aux données.
-- **model/entity** : entités JPA (User, Room, Reservation, Rating, …).
-- **dto** : objets de transfert pour les réponses JSON / formulaires.
+### Le modèle en gros
 
-### Modèle de données (exemple)
-
-- **User** : id, nom, email, mot de passe, rôle, statut.
-- **Room** : id, nom, capacité, équipements, description, disponibilité.
-- **Reservation** : id, utilisateur, salle, date, créneau horaire, statut (en attente, confirmée, annulée).
-- **Rating** (prévu) : id, salle, utilisateur, note, commentaire, date.
+- **User** : identifiant, infos perso, mot de passe haché, rôle.
+- **Room** : nom, capacité, équipements, disponibilité, description.
+- **Booking** : utilisateur, salle, créneau, titre.
 
 ***
 
-## Stack technique détaillée
+## Stack technique
 
-- **Backend** :
-    - Spring Boot (Java 17)
-    - Spring MVC (contrôleurs REST / Thymeleaf)
-    - Spring Data JPA (accès à PostgreSQL)
-    - Spring Security (authentification / autorisation)
-    - Spring Validation (validation des formulaires)
-
-- **Frontend** :
-    - Thymeleaf, HTML5, CSS.
-
-- **Base de données** :
-    - PostgreSQL (local ou via image Docker `postgres`).
-
-- **Conteneurisation** :
-    - Docker / Docker Compose pour lancer l'appli et la base de données.
-
-- **Tests** :
-    - JUnit, Spring Boot Test, Mockito pour la couche service / contrôleur.
+- **Backend** : Spring Boot (Java 17), Spring MVC, Spring Data JPA, Spring Security, Spring Validation.
+- **Frontend** : Thymeleaf + CSS fait main (pas de Bootstrap ni Tailwind).
+- **Base de données** : PostgreSQL (H2 en mémoire pour les tests).
+- **Conteneurisation** : Docker.
+- **Tests** : JUnit 5, Spring Boot Test, Mockito, MockMvc — sur les services et sur les contrôleurs (rôles, autorisations, protection contre l'IDOR sur les réservations).
 
 ***
 
-## Installation et exécution
+## Lancer le projet
 
-### Prérequis
+### Avant de commencer
 
-- Java 17.
-- Maven.
-- Docker & Docker Compose (optionnel mais conseillé).
+- Java 17
+- Maven (ou le wrapper `./mvnw` déjà dans le repo, pas besoin d'installer Maven à part)
+- Docker si tu veux éviter d'installer PostgreSQL à la main
 
-### Lancer avec Docker (exemple)
+### Avec Docker
 
-1. Configurer `docker-compose.yml` avec un service `postgres` et l'application Spring Boot.
-2. Lancer :
-   ```bash
-   docker-compose up --build
-   ```  
-3. Accéder à l'application sur `http://localhost:8080`.
+```bash
+docker-compose up --build
+```
+Puis direction `http://localhost:8080`.
 
-### Lancer en local sans Docker
+### En local, sans Docker
 
-1. Cloner le projet :
-   ```bash
-   git clone https://github.com/UBONGO2000/BookingRoom.git
-   cd BookingRoom
-   ```  
-2. Créer une base PostgreSQL :
-   - Nom : `bookingroom`
-   - Utilisateur / mot de passe à reporter dans `application.properties`
-3. Lancer :
-   ```bash
-   mvn spring-boot:run
-   # ou
-   ./mvnw spring-boot:run
-   ```  
-4. Ouvrir `http://localhost:8080`.
+```bash
+git clone https://github.com/UBONGO2000/BookingRoom.git
+cd BookingRoom
+```
 
-***
+Crée une base PostgreSQL nommée `bookingroom`, renseigne l'utilisateur/mot de passe dans `application.properties` (ou via les variables d'environnement `DB_USERNAME`/`DB_PASSWORD`), puis :
 
-## Comptes par défaut
+```bash
+./mvnw spring-boot:run
+```
 
-Les comptes suivants sont créés automatiquement au premier lancement :
+Ouvre `http://localhost:8080`.
 
-| Rôle | Nom d'utilisateur | Mot de passe |
-|------|-------------------|--------------|
+### Comptes de démo
+
+Créés automatiquement au premier démarrage :
+
+| Rôle | Utilisateur | Mot de passe |
+|------|-------------|---------------|
 | Utilisateur | `user` | `User@123` |
 | Administrateur | `admin` | `Admin@123` |
 
-**Politique de mot de passe** (inscription) :
-- Minimum 8 caractères
-- Au moins 1 lettre majuscule
-- Au moins 1 lettre minuscule
-- Au moins 1 chiffre
-- Au moins 1 caractère spécial (@$!%*?&)
+Ce seed peut être désactivé (`SEED_DEFAULT_USERS=false`) ou personnalisé via variables d'environnement (`SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD`, etc.) — utile le jour où ça sort de mon poste local.
+
+**Règles pour un nouveau mot de passe** (à l'inscription) : 8 caractères minimum, une majuscule, une minuscule, un chiffre, un caractère spécial (`@$!%*?&`). Le nom d'utilisateur, lui, n'accepte que lettres, chiffres et underscores.
 
 ***
 
-## Routes principales
+## Les routes
 
-- `GET /login` : page de connexion.
-- `POST /login` : traitement de la connexion.
-- `GET /logout` : déconnexion.
-- `GET /register` : page d'inscription.
-- `POST /register` : traitement de l'inscription.
-- `GET /dashboard` : tableau de bord utilisateur.
-- `GET /booking` : liste des salles + recherche.
-- `GET /booking/{id}` : détail d'une salle.
-- `POST /booking/confirm` : confirmer une réservation.
-- `POST /booking/cancel/{id}` : annuler une réservation.
-- `GET /admin` : dashboard administrateur.
-- `GET /admin/rooms/new` : formulaire création salle.
-- `POST /admin/rooms/save` : sauvegarder salle.
-- `GET /admin/rooms/edit/{id}` : formulaire modification salle.
-- `GET /admin/rooms/delete/{id}` : supprimer salle.
+| Route | Méthode | Ce qu'elle fait |
+|---|---|---|
+| `/` | GET | Page d'accueil |
+| `/login` | GET / POST | Page de connexion / traitement |
+| `/logout` | POST | Déconnexion |
+| `/register` | GET / POST | Inscription |
+| `/dashboard` | GET | Tableau de bord utilisateur |
+| `/booking` | GET / POST | Liste des salles + recherche |
+| `/booking/{id}` | GET | Détail d'une salle |
+| `/booking/confirm` | POST | Confirmer une réservation |
+| `/booking/cancel/{id}` | POST | Annuler une réservation (propriétaire ou admin uniquement) |
+| `/admin` | GET | Tableau de bord admin |
+| `/admin/rooms/new` | GET | Formulaire de création de salle |
+| `/admin/rooms/save` | POST | Créer / modifier une salle |
+| `/admin/rooms/edit/{id}` | GET | Formulaire de modification |
+| `/admin/rooms/delete/{id}` | POST | Supprimer une salle |
+| `/admin/rooms/toggle-availability/{id}` | POST | Activer / désactiver une salle |
 
-### Documentation API REST
+Les suppressions et changements d'état sont volontairement en `POST`, jamais en `GET` — un lien qui modifie des données au simple survol ou preload, c'est une porte ouverte que je préfère fermer.
 
-Les endpoints API sont sécurisés. L'authentification par session est utilisée, mais le CSRF est désactivé pour les routes `/api/**` afin de faciliter l'intégration mobile.
+### API REST
 
-- `POST /api/auth/login` : Authentification (JSON: `username`, `password`). Retourne un message de succès et le nom d'utilisateur.
-- `GET /api/rooms` : Liste des salles. Paramètres optionnels : `name`, `capacity`, `projector`, `whiteboard`, `videoconferencing`, `page`, `size`.
-- `GET /api/rooms/{id}` : Détail d'une salle avec placeholder pour les évaluations.
-- `GET /api/reservations/me` (ou `/api/my-bookings`) : Liste des réservations de l'utilisateur connecté.
-- `POST /api/reservations` : Créer une réservation. JSON: `title`, `startTime`, `endTime`, `roomId`. Les dates doivent être au format ISO (ex: `2026-04-18T14:00:00`).
-- `GET /api/stats/overview` : Vue d'ensemble des statistiques de l'application.
-- `GET /api/rooms/available-now` : Salles disponibles immédiatement pour 1h.
-- `GET /api/me` : Informations du profil connecté.
+Les routes `/api/**` s'appuient sur la même session que le site (pas de JWT pour l'instant), et le CSRF y est désactivé pour simplifier une future intégration mobile.
+
+- `POST /api/auth/login` — authentification JSON (`username`, `password`).
+- `GET /api/rooms` — liste des salles, filtrable (`name`, `capacity`, `projector`, `whiteboard`, `videoconferencing`, `page`, `size`).
+- `GET /api/rooms/{id}` — détail d'une salle (le champ `evaluations` est un placeholder, la fonctionnalité n'existe pas encore côté modèle).
+- `GET /api/reservations/me` (alias `/api/my-bookings`) — mes réservations.
+- `POST /api/reservations` — créer une réservation (`title`, `startTime`, `endTime`, `roomId`, dates au format ISO).
+- `GET /api/stats/overview` — quelques statistiques globales.
+- `GET /api/rooms/available-now` — salles libres dans l'heure qui vient.
+- `GET /api/me` — mon profil.
 
 ***
 
 ## Sécurité
 
-### Mesures implémentées
+Ce qui est en place aujourd'hui :
 
-- **Protection CSRF** : Réactivée pour sécuriser les formulaires contre les attaques de type Cross-Site Request Forgery.
-- **Gestion Globale des Erreurs** : Utilisation de `@ControllerAdvice` pour capturer les exceptions et afficher des pages d'erreur personnalisées.
-- **Chiffrement des mots de passe** : BCrypt avec salt automatique.
-- **Gestion des rôles** : USER et ADMIN avec séparation stricte des routes.
-- **Validation des formulaires** : Spring Validation sur User, Room et Booking.
-- **Politique de mot de passe** : complexité minimale requise.
-- **Logout sécurisé** : invalidation de session et suppression des cookies.
-- **Protection anti brute-force** : verrouillage d'un compte après 5 tentatives de connexion échouées (formulaire et API), pendant 15 minutes. Seuils configurables via les variables d'environnement `LOGIN_MAX_ATTEMPTS` et `LOGIN_LOCK_DURATION_MINUTES`.
+- **CSRF** activé partout, sauf sur `/api/**`.
+- **Mots de passe** hachés en BCrypt.
+- **Rôles** USER/ADMIN avec séparation stricte des routes — vérifiée par des tests, pas juste "ça marche chez moi".
+- **Anti brute-force** : un compte se verrouille 15 minutes après 5 échecs de connexion (formulaire et API), seuils réglables via `LOGIN_MAX_ATTEMPTS` et `LOGIN_LOCK_DURATION_MINUTES`.
+- **Gestion d'erreurs séparée** : les pages web reçoivent une page d'erreur HTML, l'API reçoit du JSON — pas de page HTML renvoyée à un client mobile qui attendait une réponse structurée.
+- **Profil `prod`** (`SPRING_PROFILES_ACTIVE=prod`) qui coupe le logging SQL et passe Hibernate en `validate` au lieu de `update`. Les valeurs par défaut restent orientées dev pour ne pas se prendre les pieds dans le tapis en local.
+- Déconnexion propre : session invalidée, cookies supprimés.
 
-### Recommandations pour la production
+Ce qu'il resterait à faire avant un vrai déploiement en prod :
 
-- Activer HTTPS.
-- Configurer des headers de sécurité supplémentaires (HSTS, CSP, etc.).
-- Utiliser une base de données PostgreSQL en production (pas H2).
+- Activer HTTPS (question d'infra, pas de code ici).
+- Ajouter des headers de sécurité supplémentaires (HSTS, CSP...).
+- S'assurer que la base cible est bien PostgreSQL, pas H2.
 
 ***
 
-## Backlog technique (idées d'implémentation)
+## Tests
 
-- **Emails** : configuration de Spring Mail + templates Thymeleaf pour confirmation / annulation.
-- **Calendrier** : intégration de FullCalendar (JS) sur une page Thymeleaf consommant un endpoint JSON `/api/calendar`.
-- **PDF** : service dédié générant un récapitulatif de réservation et endpoint `/reservations/{id}/pdf`.
-- **Push** : enregistrement des tokens (Web Push ou mobile) côté backend et envoi lors des changements de statut.
-- **Notes / avis** : formulaire d'évaluation sur la page de détail d'une salle, affichage de la note moyenne.
+```bash
+./mvnw test
+```
+
+Deux niveaux de couverture :
+- **Services** : logique métier (recherche de salles, création de réservation, règles de disponibilité...).
+- **Contrôleurs** (MockMvc) : je vérifie en particulier deux choses faciles à casser sans s'en rendre compte — que les routes admin refusent bien un utilisateur non-admin, et qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR).
+
+***
+
+## Backlog technique
+
+Des pistes plus concrètes pour les points encore non cochés plus haut :
+
+- **Emails** : Spring Mail + template Thymeleaf pour la confirmation/annulation.
+- **Calendrier** : FullCalendar côté JS, consommant un endpoint `/api/calendar` à créer.
+- **PDF** : un service dédié + route `/reservations/{id}/pdf`.
+- **Notes/avis** : un formulaire sur la page de détail d'une salle, plus le calcul de la moyenne. C'est la pièce qui manque pour que le champ `evaluations` de l'API arrête d'être un mensonge poli.
+- **Push** : à voir si ça vaut vraiment le coup pour un outil de cette taille avant de s'attaquer à la complexité que ça implique (service worker, gestion des tokens...).
