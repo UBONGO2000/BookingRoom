@@ -1,0 +1,245 @@
+/* Mise en page partagee des pages d'authentification (login/register).
+   Reprend les tokens du design system (base.css) au lieu de couleurs
+   codees en dur, pour rester coherent avec le reste du site et son
+   mode sombre. */
+
+.auth-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+/* --- PANNEAU DE MARQUE (gauche) --- */
+.auth-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    background-color: var(--primary);
+    color: white;
+}
+
+.auth-brand-content {
+    max-width: 380px;
+}
+
+.auth-logo {
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.auth-tagline {
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 2.5rem;
+    color: white;
+}
+
+.auth-illustration {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+}
+
+/* Logo affiche uniquement au-dessus du formulaire sur petit ecran,
+   quand le panneau de marque est masque (voir media query plus bas). */
+.auth-logo--mobile {
+    display: none;
+    color: var(--primary);
+}
+
+/* --- PANNEAU FORMULAIRE (droite) --- */
+.auth-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    background-color: var(--bg-main);
+    min-width: 0;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-card h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.auth-card > p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+/* --- MESSAGES D'ETAT --- */
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #047857;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #b91c1c;
+}
+
+[data-theme="dark"] .alert-success {
+    color: #6ee7b7;
+}
+
+[data-theme="dark"] .alert-error {
+    color: #fca5a5;
+}
+
+/* --- GRILLE PRENOM/NOM (register) --- */
+.name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* --- FORMULAIRE & CHAMPS --- */
+.input-group {
+    margin-bottom: 1.25rem;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    fill: var(--text-muted);
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.75rem 0.75rem 0.75rem 2.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.error-message {
+    display: block;
+    color: #b91c1c;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+}
+
+[data-theme="dark"] .error-message {
+    color: #fca5a5;
+}
+
+.help-text {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.4rem;
+}
+
+/* --- BOUTON --- */
+.auth-submit {
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.auth-submit:hover {
+    background-color: var(--primary-hover);
+}
+
+/* --- LIEN DE BASCULE LOGIN/REGISTER --- */
+.auth-switch {
+    margin-top: 1.75rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-switch a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+    .auth-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .auth-brand {
+        display: none;
+    }
+
+    .auth-logo--mobile {
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+
+    .auth-panel {
+        padding: 2.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .name-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
