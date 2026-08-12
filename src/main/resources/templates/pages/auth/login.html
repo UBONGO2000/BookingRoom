@@ -5,66 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - RoomBooker</title>
     <link rel="stylesheet" th:href="@{/css/base.css}">
-    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
 <body>
 
-<div class="login-card">
-    <h2>Bon retour !</h2>
-    <p>Connectez-vous pour gérer vos réservations.</p>
+<div class="auth-layout">
+    <aside class="auth-brand">
+        <div class="auth-brand-content">
+            <a th:href="@{/}" class="auth-logo">RoomBooker</a>
+            <p class="auth-tagline">Réservez une salle en quelques secondes, sans chaîne d'emails interminable.</p>
+            <svg class="auth-illustration" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <rect x="90" y="70" width="140" height="80" rx="16" stroke="white" stroke-opacity="0.9" stroke-width="3"/>
+                <circle cx="70" cy="60" r="14" stroke="white" stroke-opacity="0.6" stroke-width="3"/>
+                <circle cx="70" cy="160" r="14" stroke="white" stroke-opacity="0.6" stroke-width="3"/>
+                <circle cx="250" cy="60" r="14" stroke="white" stroke-opacity="0.6" stroke-width="3"/>
+                <circle cx="250" cy="160" r="14" stroke="white" stroke-opacity="0.6" stroke-width="3"/>
+                <circle cx="160" cy="30" r="14" stroke="white" stroke-opacity="0.6" stroke-width="3"/>
+                <circle cx="160" cy="190" r="14" stroke="white" stroke-opacity="0.6" stroke-width="3"/>
+                <circle cx="160" cy="110" r="26" stroke="white" stroke-opacity="0.9" stroke-width="3"/>
+                <path d="M160 100v10l8 6" stroke="white" stroke-opacity="0.9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </aside>
 
-    <!-- Message de déconnexion -->
-    <div th:if="${param.logout}" class="alert alert-success">
-        Vous avez été déconnecté avec succès.
-    </div>
+    <main class="auth-panel">
+        <div class="auth-card">
+            <a th:href="@{/}" class="auth-logo auth-logo--mobile">RoomBooker</a>
 
-    <!-- Message d'erreur -->
-    <div th:if="${param.error}" class="alert alert-error">
-        Identifiants invalides.
-    </div>
+            <h1>Bon retour !</h1>
+            <p>Connectez-vous pour gérer vos réservations.</p>
 
-    <!-- Message de verrouillage temporaire -->
-    <div th:if="${param.locked}" class="alert alert-error">
-        Trop de tentatives échouées. Réessayez dans quelques minutes.
-    </div>
+            <!-- Message de déconnexion -->
+            <div th:if="${param.logout}" class="alert alert-success">
+                Vous avez été déconnecté avec succès.
+            </div>
 
-    <!-- Message d'inscription réussie -->
-    <div th:if="${param.registered}" class="alert alert-success">
-        Inscription réussie ! Veuillez vous connecter.
-    </div>
+            <!-- Message d'erreur -->
+            <div th:if="${param.error}" class="alert alert-error">
+                Identifiants invalides.
+            </div>
 
-    <form th:action="@{/login}" method="post">
-        <!-- Champ Username -->
-        <div class="input-group">
-            <label for="username">Nom d'utilisateur</label>
-            <div class="input-wrapper">
-                <!-- Icône SVG User -->
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                <input type="text" id="username" name="username" placeholder="ex: jean.dupont" required autocomplete="username">
+            <!-- Message de verrouillage temporaire -->
+            <div th:if="${param.locked}" class="alert alert-error">
+                Trop de tentatives échouées. Réessayez dans quelques minutes.
+            </div>
+
+            <!-- Message d'inscription réussie -->
+            <div th:if="${param.registered}" class="alert alert-success">
+                Inscription réussie ! Veuillez vous connecter.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <!-- Champ Username -->
+                <div class="input-group">
+                    <label for="username">Nom d'utilisateur</label>
+                    <div class="input-wrapper">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <input type="text" id="username" name="username" placeholder="ex: jean.dupont" required autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Champ Password -->
+                <div class="input-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="input-wrapper">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3 3.1-3 1.71 0 3.1 1.29 3.1 3v2z"/>
+                        </svg>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit">Se connecter</button>
+            </form>
+
+            <div class="auth-switch">
+                Pas encore de compte ? <a th:href="@{/register}">S'inscrire</a>
             </div>
         </div>
-
-        <!-- Champ Password -->
-        <div class="input-group">
-            <label for="password">Mot de passe</label>
-            <div class="input-wrapper">
-                <!-- Icône SVG Lock -->
-                <svg viewBox="0 0 24 24">
-                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3 3.1-3 1.71 0 3.1 1.29 3.1 3v2z"/>
-                </svg>
-                <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
-            </div>
-        </div>
-
-        <button type="submit">Se connecter</button>
-    </form>
-
-    <div  class="register-link">
-        Pas encore de compte ? <a th:href="@{/register}">S'inscrire</a>
-    </div>
+    </main>
 </div>
+
+<script th:src="@{/js/theme.js}"></script>
 
 </body>
 </html>
