@@ -60,10 +60,11 @@ main {
     cursor: pointer;
 }
 
-.radio-group input[type="radio"] {
+.radio-group input[type="checkbox"] {
     width: 1.25rem;
     height: 1.25rem;
     accent-color: var(--primary);
+    cursor: pointer;
 }
 
 .btn-search {
@@ -295,6 +296,12 @@ main {
     color: var(--text-main);
 }
 
+.form-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+}
+
 /* Scoped to .form-container: .form-group is also used, with a different
    layout, by the room search form and the room detail booking form above. */
 .form-container .form-group {
@@ -332,6 +339,17 @@ main {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    cursor: pointer;
 }
 
 .btn-submit-block {

@@ -15,6 +15,7 @@
 <main>
     <div class="form-container">
         <h2 th:text="${room.id == null ? 'Ajouter une salle' : 'Modifier la salle'}">Editer Salle</h2>
+        <p class="form-subtitle" th:text="${room.id == null ? 'Renseignez les informations de la nouvelle salle.' : 'Mettez à jour les informations de cette salle.'}">Sous-titre</p>
         <form th:action="@{/admin/rooms/save}" th:object="${room}" method="post">
             <input type="hidden" th:field="*{id}">
             
