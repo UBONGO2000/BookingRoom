@@ -38,11 +38,11 @@
         <table th:unless="${#lists.isEmpty(rooms)}" class="data-table">
             <thead>
                 <tr>
-                    <th>Nom</th>
-                    <th>Localisation</th>
-                    <th>Capacité</th>
-                    <th>Disponibilité</th>
-                    <th>Actions</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Localisation</th>
+                    <th scope="col">Capacité</th>
+                    <th scope="col">Disponibilité</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,12 +99,12 @@
         <table th:unless="${#lists.isEmpty(bookings)}" class="data-table">
             <thead>
                 <tr>
-                    <th>Salle</th>
-                    <th>Utilisateur</th>
-                    <th>Titre</th>
-                    <th>Début</th>
-                    <th>Fin</th>
-                    <th>Actions</th>
+                    <th scope="col">Salle</th>
+                    <th scope="col">Utilisateur</th>
+                    <th scope="col">Titre</th>
+                    <th scope="col">Début</th>
+                    <th scope="col">Fin</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>

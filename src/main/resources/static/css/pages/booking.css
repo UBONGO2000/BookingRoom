@@ -2,6 +2,14 @@ main {
     padding: 3rem 5%;
 }
 
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
 .search-container {
     background-color: var(--bg-card);
     padding: 2.5rem;

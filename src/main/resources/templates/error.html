@@ -48,7 +48,7 @@
 
 <main>
     <div class="error-container">
-        <div class="error-icon">⚠️</div>
+        <div class="error-icon" aria-hidden="true">⚠️</div>
         <h1>Oups ! Quelque chose s'est mal passé</h1>
         <p th:text="${errorMessage}">Une erreur inattendue est survenue.</p>
         <a th:href="@{/}" class="btn-home">Retour à l'accueil</a>

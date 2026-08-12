@@ -14,6 +14,8 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <main>
+    <h1 class="page-title">Réserver une salle</h1>
+
     <section class="search-container">
         <h2>Trouver une salle</h2>
         <form class="search-form" th:action="@{/booking}" method="post" th:object="${roomsearch}">
