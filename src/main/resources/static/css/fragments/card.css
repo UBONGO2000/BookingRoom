@@ -12,17 +12,39 @@
     box-shadow: var(--shadow-md);
 }
 
-.card .img {
+/* Identite visuelle generee par salle (evite de reutiliser la meme
+   photo generique sur chaque carte) : une teinte + une icone parmi 6,
+   choisies a partir de l'id de la salle. */
+.card .visual {
     width: 100%;
     height: 200px;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.card .img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.card .visual svg {
+    width: 56px;
+    height: 56px;
 }
+
+.room-visual--0 { background-color: rgba(79, 70, 229, 0.12); }
+.room-visual--0 svg { fill: #4f46e5; }
+
+.room-visual--1 { background-color: rgba(16, 185, 129, 0.12); }
+.room-visual--1 svg { fill: #059669; }
+
+.room-visual--2 { background-color: rgba(245, 158, 11, 0.12); }
+.room-visual--2 svg { fill: #b45309; }
+
+.room-visual--3 { background-color: rgba(59, 130, 246, 0.12); }
+.room-visual--3 svg { fill: #2563eb; }
+
+.room-visual--4 { background-color: rgba(139, 92, 246, 0.12); }
+.room-visual--4 svg { fill: #7c3aed; }
+
+.room-visual--5 { background-color: rgba(20, 184, 166, 0.12); }
+.room-visual--5 svg { fill: #0d9488; }
 
 .card .content {
     padding: 1.5rem;

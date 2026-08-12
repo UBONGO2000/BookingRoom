@@ -24,9 +24,24 @@
             <p th:text="${room.description}">Description de la salle...</p>
 
             <div class="equipment">
-                <div th:if="${room.projector}" class="eq-item">📽️ Projecteur</div>
-                <div th:if="${room.whiteboard}" class="eq-item">📋 Tableau Blanc</div>
-                <div th:if="${room.videoconferencing}" class="eq-item">📹 Vidéo</div>
+                <div th:if="${room.projector}" class="eq-item">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
+                    </svg>
+                    Projecteur
+                </div>
+                <div th:if="${room.whiteboard}" class="eq-item">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    Tableau Blanc
+                </div>
+                <div th:if="${room.videoconferencing}" class="eq-item">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                    </svg>
+                    Vidéo
+                </div>
             </div>
 
             <div class="existing-bookings">

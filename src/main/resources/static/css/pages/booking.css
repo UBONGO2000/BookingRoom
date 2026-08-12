@@ -167,9 +167,15 @@ main {
     font-size: 0.875rem;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     color: var(--text-main);
     border: 1px solid var(--border-color);
+}
+
+.eq-item svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--text-muted);
 }
 
 .booking-form {
