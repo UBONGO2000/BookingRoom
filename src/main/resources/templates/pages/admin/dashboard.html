@@ -13,14 +13,29 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <main class="admin-section">
-    <h1>Administration</h1>
+    <header class="admin-header">
+        <h1>Administration</h1>
+        <p>Gérez les salles et supervisez les réservations de l'organisation.</p>
+    </header>
 
     <section>
         <div class="section-header">
             <h2>Gestion des Salles</h2>
             <a th:href="@{/admin/rooms/new}" class="btn btn-primary">Ajouter une salle</a>
         </div>
-        <table class="data-table">
+
+        <div th:if="${#lists.isEmpty(rooms)}" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M4 9v10.9c0 .61.49 1.1 1.1 1.1H13V4H5.1C4.49 4 4 4.49 4 5v4m10.5 6c.83 0 1.5-1.12 1.5-2.5S15.33 10 14.5 10s-1.5 1.12-1.5 2.5.67 2.5 1.5 2.5M15 3v2h4.97V21H15v2h7V3h-7z"/>
+                </svg>
+            </div>
+            <h3>Aucune salle enregistrée</h3>
+            <p>Ajoutez votre première salle pour commencer à gérer les réservations.</p>
+            <a th:href="@{/admin/rooms/new}" class="btn btn-primary">Ajouter une salle</a>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(rooms)}" class="data-table">
             <thead>
                 <tr>
                     <th>Nom</th>
@@ -71,7 +86,17 @@
                 <a th:href="@{/admin}" class="btn btn-outline">Réinitialiser</a>
             </form>
         </div>
-        <table class="data-table">
+        <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                </svg>
+            </div>
+            <h3>Aucune réservation trouvée</h3>
+            <p>Aucune réservation ne correspond à ces filtres pour le moment.</p>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(bookings)}" class="data-table">
             <thead>
                 <tr>
                     <th>Salle</th>
