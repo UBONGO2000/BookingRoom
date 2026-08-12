@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - RoomBooker</title>
+    <title>Inscription - BookingRoom</title>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
@@ -12,7 +12,7 @@
 <div class="auth-layout">
     <aside class="auth-brand">
         <div class="auth-brand-content">
-            <a th:href="@{/}" class="auth-logo">RoomBooker</a>
+            <a th:href="@{/}" class="auth-logo">BookingRoom</a>
             <p class="auth-tagline">Rejoignez vos collègues et réservez votre première salle en moins d'une minute.</p>
             <svg class="auth-illustration" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                 <rect x="90" y="70" width="140" height="80" rx="16" stroke="white" stroke-opacity="0.9" stroke-width="3"/>
@@ -29,10 +29,10 @@
 
     <main class="auth-panel">
         <div class="auth-card">
-            <a th:href="@{/}" class="auth-logo auth-logo--mobile">RoomBooker</a>
+            <a th:href="@{/}" class="auth-logo auth-logo--mobile">BookingRoom</a>
 
             <h1>Créer un compte</h1>
-            <p>Rejoignez RoomBooker pour réserver vos espaces.</p>
+            <p>Rejoignez BookingRoom pour réserver vos espaces.</p>
 
             <!-- Messages d'erreur globaux -->
             <div th:if="${usernameError}" class="alert alert-error" th:text="${usernameError}"></div>

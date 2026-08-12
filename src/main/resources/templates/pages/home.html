@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoomBooker - Réservez votre espace</title>
+    <title>BookingRoom - Réservez votre espace</title>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/home.css}">
@@ -12,13 +12,63 @@
 
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main class="hero">
-    <h1>Réservez votre salle de réunion en un clic</h1>
-    <p>Des espaces modernes, équipés et adaptés à tous vos besoins professionnels. Simple, rapide et efficace.</p>
-    <div class="cta-group">
-        <a th:href="@{/booking}" class="btn-primary">Réserver maintenant</a>
-        <a th:href="@{/register}" class="btn-secondary">Créer un compte</a>
-    </div>
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Réservez votre salle de réunion en un clic</h1>
+            <p>Des espaces modernes, équipés et adaptés à tous vos besoins professionnels. Simple, rapide et efficace.</p>
+            <div class="cta-group">
+                <a th:href="@{/booking}" class="btn btn-primary btn-lg">Réserver maintenant</a>
+                <a th:href="@{/register}" class="btn btn-outline btn-lg">Créer un compte</a>
+            </div>
+        </div>
+        <div class="hero-illustration">
+            <svg viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <rect x="40" y="40" width="280" height="220" rx="16" fill="var(--bg-card)" stroke="var(--border-color)" stroke-width="2"/>
+                <path d="M40 96a16 16 0 0 1 16-16h248a16 16 0 0 1 16 16v0H40z" fill="var(--primary)"/>
+                <rect x="64" y="128" width="180" height="12" rx="6" fill="var(--border-color)"/>
+                <rect x="64" y="156" width="140" height="12" rx="6" fill="var(--border-color)"/>
+                <rect x="64" y="184" width="160" height="12" rx="6" fill="var(--border-color)"/>
+                <rect x="64" y="212" width="100" height="12" rx="6" fill="var(--border-color)"/>
+                <circle cx="320" cy="260" r="36" fill="var(--secondary)"/>
+                <path d="M304 260l10 10 20-24" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h2>Comment ça marche</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </div>
+                <h3>Trouvez une salle</h3>
+                <p>Filtrez par capacité, équipement et disponibilité pour trouver l'espace qui convient.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/>
+                    </svg>
+                </div>
+                <h3>Réservez en un clic</h3>
+                <p>Choisissez un créneau, ajoutez un titre à votre réunion, et confirmez.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <h3>C'est confirmé</h3>
+                <p>Retrouvez toutes vos réservations à venir depuis votre tableau de bord.</p>
+            </div>
+        </div>
+    </section>
 </main>
+
 </body>
 </html>
