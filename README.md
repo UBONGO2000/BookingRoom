@@ -170,11 +170,11 @@ Les endpoints API sont sécurisés. L'authentification par session est utilisée
 - **Validation des formulaires** : Spring Validation sur User, Room et Booking.
 - **Politique de mot de passe** : complexité minimale requise.
 - **Logout sécurisé** : invalidation de session et suppression des cookies.
+- **Protection anti brute-force** : verrouillage d'un compte après 5 tentatives de connexion échouées (formulaire et API), pendant 15 minutes. Seuils configurables via les variables d'environnement `LOGIN_MAX_ATTEMPTS` et `LOGIN_LOCK_DURATION_MINUTES`.
 
 ### Recommandations pour la production
 
 - Activer HTTPS.
-- Implémenter une protection contre les attaques Brute Force (rate limiting).
 - Configurer des headers de sécurité supplémentaires (HSTS, CSP, etc.).
 - Utiliser une base de données PostgreSQL en production (pas H2).
 
