@@ -34,3 +34,5 @@ build/
 
 # Environmental variables
 .env
+.env.*
+!.env.example

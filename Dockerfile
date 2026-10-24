@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y tzdata && \
     rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Europe/Paris
+# Profil obligatoire : pas de compte de demo, schema valide, secrets via variables d'environnement.
+ENV SPRING_PROFILES_ACTIVE=prod
 
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080

@@ -77,17 +77,25 @@ git clone https://github.com/UBONGO2000/BookingRoom.git
 cd BookingRoom
 ```
 
-Crée une base PostgreSQL nommée `bookingroom`, renseigne l'utilisateur/mot de passe dans `application.properties` (ou via les variables d'environnement `DB_USERNAME`/`DB_PASSWORD`), puis :
+Crée une base PostgreSQL nommée `bookingroom`, puis renseigne les identifiants :
 
 ```bash
-./mvnw spring-boot:run
+cp .env.example .env   # fichier ignoré par Git, chargé automatiquement par Spring Boot
+```
+
+(ou exporte `DB_URL`, `DB_USERNAME` et `DB_PASSWORD` dans le shell)
+
+Lance ensuite avec le profil `dev` (nécessaire pour créer les données de démonstration) :
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 Ouvre `http://localhost:8080`.
 
 ### Comptes de démo
 
-Créés automatiquement au premier démarrage :
+Créés automatiquement au premier démarrage **en profil `dev` uniquement** (aucun compte en `prod`) :
 
 | Rôle | Utilisateur | Mot de passe |
 |------|-------------|---------------|
@@ -141,12 +149,12 @@ Les routes `/api/**` s'appuient sur la même session que le site (pas de JWT pou
 
 Ce qui est en place aujourd'hui :
 
-- **CSRF** activé partout, sauf sur `/api/**`.
+- **CSRF** activé partout, y compris sur `/api/**` : seul `POST /api/auth/login` est exempté. Le client récupère le token via `GET /api/csrf` (cookie `XSRF-TOKEN`) et l'envoie dans l'en-tête `X-XSRF-TOKEN`.
 - **Mots de passe** hachés en BCrypt.
 - **Rôles** USER/ADMIN avec séparation stricte des routes — vérifiée par des tests, pas juste "ça marche chez moi".
 - **Anti brute-force** : un compte se verrouille 15 minutes après 5 échecs de connexion (formulaire et API), seuils réglables via `LOGIN_MAX_ATTEMPTS` et `LOGIN_LOCK_DURATION_MINUTES`.
 - **Gestion d'erreurs séparée** : les pages web reçoivent une page d'erreur HTML, l'API reçoit du JSON — pas de page HTML renvoyée à un client mobile qui attendait une réponse structurée.
-- **Profil `prod`** (`SPRING_PROFILES_ACTIVE=prod`) qui coupe le logging SQL et passe Hibernate en `validate` au lieu de `update`. Les valeurs par défaut restent orientées dev pour ne pas se prendre les pieds dans le tapis en local.
+- **Profil `prod`** (`SPRING_PROFILES_ACTIVE=prod`, déjà positionné dans le `Dockerfile`) : identifiants **sans valeur de repli** (l'application refuse de démarrer si `DB_URL`, `DB_USERNAME` ou `DB_PASSWORD` manquent), SQL non loggé et Hibernate en `validate` au lieu de `update`. Les défauts du fichier commun restent orientés dev pour ne pas se prendre les pieds dans le tapis en local.
 - Déconnexion propre : session invalidée, cookies supprimés.
 
 Ce qu'il resterait à faire avant un vrai déploiement en prod :
@@ -163,13 +171,13 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-57 tests répartis sur 10 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+72 tests répartis sur 13 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 61,5 % | 59,0 % |
-| Couche service | 84,9 % | 96,6 % |
-| Couche contrôleur | 25,8 % | 30,0 % |
+| Ensemble du projet | 74,4 % | 72,2 % |
+| Couche service | 87,1 % | 96,6 % |
+| Couche contrôleur | 51,9 % | 55,8 % |
 
 La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité). Les contrôleurs le sont beaucoup moins pour l'instant — j'ai ciblé volontairement les deux points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, et qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR). `AuthController` et `HomeController` n'ont pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
 
