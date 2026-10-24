@@ -2,7 +2,9 @@ package com.springbootlearning.learningspringboot.bookingroom.service;
 
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -10,23 +12,35 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
+    @Transactional
     public User register(String firstname, String lastname, String username, String email, String password) {
-        if(!existByUsername(username)){
-            User user = new User(firstname, lastname, username, email, password);
-            return userRepository.save(user);
+        if (existByUsername(username)) {
+            throw new IllegalArgumentException("Ce nom d'utilisateur est deja utilise");
         }
-        return null;
+        if (existByEmail(email)) {
+            throw new IllegalArgumentException("Cette adresse email est deja utilisee");
+        }
+
+        User user = new User(firstname, lastname, username, email, passwordEncoder.encode(password));
+        return userRepository.save(user);
     }
 
     @Override
     public Boolean existByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public Boolean existByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     @Override

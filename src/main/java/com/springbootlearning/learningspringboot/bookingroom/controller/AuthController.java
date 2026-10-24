@@ -3,7 +3,6 @@ package com.springbootlearning.learningspringboot.bookingroom.controller;
 import com.springbootlearning.learningspringboot.bookingroom.dto.RegisterFormDto;
 import com.springbootlearning.learningspringboot.bookingroom.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,11 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AuthController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/login")
@@ -52,12 +49,13 @@ public class AuthController {
             return "pages/auth/register";
         }
 
+        // L'encodage du mot de passe est fait dans UserService (jamais dans le controleur).
         userService.register(
                 form.getFirstname(),
                 form.getLastname(),
                 form.getUsername(),
                 form.getEmail(),
-                passwordEncoder.encode(form.getPassword())
+                form.getPassword()
         );
         return "redirect:/login?registered";
     }

@@ -5,38 +5,49 @@ import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 @Profile("dev")
 public class DataInitializer {
 
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
     private  RoomRepository roomrepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    @Value("${app.seed.admin.username}")
+    @Value("${app.seed.default-users.enabled:true}")
+    private boolean seedDefaultUsersEnabled;
+
+    @Value("${app.seed.default-users.admin-username:admin}")
     private String adminUsername;
 
-    @Value("${app.seed.admin.password}")
+    @Value("${app.seed.default-users.admin-email:admin@gmail.com}")
+    private String adminEmail;
+
+    @Value("${app.seed.default-users.admin-password:Admin@123}")
     private String adminPassword;
 
-    @Value("${app.seed.user.username}")
+    @Value("${app.seed.default-users.user-username:user}")
     private String userUsername;
 
-    @Value("${app.seed.user.password}")
-    private String userPassword;
+    @Value("${app.seed.default-users.user-email:user@gmail.com}")
+    private String userEmail;
 
+    @Value("${app.seed.default-users.user-password:User@123}")
+    private String userPassword;
 
     public DataInitializer(RoomRepository roomrepository, PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.roomrepository = roomrepository;
@@ -47,6 +58,11 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initDatabase(RoomRepository roomrepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
+            if (seedDefaultUsersEnabled) {
+                log.warn("Seeding default accounts ({}, {}) - set SEED_DEFAULT_USERS=false in production", adminUsername, userUsername);
+                seedDefaultUser("jean", "paul", adminUsername, adminEmail, adminPassword, Role.ADMIN);
+                seedDefaultUser("jacque", "pierre", userUsername, userEmail, userPassword, Role.USER);
+            }
 
             List<Room> rooms = new ArrayList<Room>();
 
@@ -74,32 +90,29 @@ public class DataInitializer {
         };
     }
 
+    private void seedDefaultUser(String firstname, String lastname, String username, String email, String rawPassword, Role role) {
+        Optional<User> existingUser = userRepository.findByUsername(username);
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void seedUsers() {
-        if (userRepository.findByUsername(adminUsername).isEmpty()) {
-            User admin = new User(
-                    "jean",
-                    "paul",
-                    adminUsername,
-                    "admin@gmail.com",
-                    passwordEncoder.encode(adminPassword),
-                    Role.ADMIN
-            );
-            userRepository.save(admin);
-            System.out.println("✅ Admin user created.");
-        }
-
-        if (userRepository.findByUsername(userUsername).isEmpty()) {
+        if (existingUser.isEmpty()) {
             User user = new User(
-                    "jacque",
-                    "pierre",
-                    userUsername,
-                    "user@gmail.com",
-                    passwordEncoder.encode(userPassword)
+                    firstname,
+                    lastname,
+                    username,
+                    email,
+                    passwordEncoder.encode(rawPassword),
+                    role
             );
             userRepository.save(user);
-            System.out.println("✅ Standard user created.");
+            System.out.println("Default user created: " + username);
+            return;
+        }
+
+        User user = existingUser.get();
+
+        if (user.getRole() != role) {
+            user.setRole(role);
+            userRepository.save(user);
+            System.out.println("Default user role updated: " + username);
         }
     }
 

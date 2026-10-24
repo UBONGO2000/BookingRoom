@@ -53,7 +53,7 @@ public class Room {
     private LocalDateTime availableFrom;
     private LocalDateTime availableUntil;
 
-    @JsonIgnore
+    @JsonIgnore // GET /api/rooms renvoie des Room bruts : sans ca, chaque booking (donc son user, donc son password) fuiterait dans le JSON
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Booking> bookings =new ArrayList<Booking>();
 

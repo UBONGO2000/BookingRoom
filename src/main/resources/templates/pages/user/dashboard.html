@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord - RoomBooker</title>
+    <title>Tableau de Bord - BookingRoom</title>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/card.css}">
@@ -22,15 +22,25 @@
     <section class="reservation">
         <h2 class="section-title">Vos Réservations à Venir</h2>
 
-        <div class="cards-grid">
-            <th:block th:if="${#lists.isEmpty(bookings)}">
-                <p>Vous n'avez pas encore de réservations.</p>
-            </th:block>
+        <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                </svg>
+            </div>
+            <h3>Aucune réservation pour le moment</h3>
+            <p>Trouvez une salle disponible et réservez votre premier créneau en quelques secondes.</p>
+            <a th:href="@{/booking}" class="btn btn-primary">Réserver une salle</a>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(bookings)}" class="cards-grid">
             <th:block th:each="b : ${bookings}">
                 <div class="container">
                     <div class="card">
-                        <div class="img">
-                            <img th:src="@{/images/img.png}" alt="Room image">
+                        <div th:class="${'visual room-visual--' + (b.room.id % 6)}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M4 9v10.9c0 .61.49 1.1 1.1 1.1H13V4H5.1C4.49 4 4 4.49 4 5v4m10.5 6c.83 0 1.5-1.12 1.5-2.5S15.33 10 14.5 10s-1.5 1.12-1.5 2.5.67 2.5 1.5 2.5M15 3v2h4.97V21H15v2h7V3h-7z"/>
+                            </svg>
                         </div>
                         <div class="content">
                             <h3 th:text="${b.room.name}">Nom de la salle</h3>
@@ -38,9 +48,9 @@
                             <p>Début : <span th:text="${#temporals.format(b.startTime, 'dd/MM/yyyy HH:mm')}"></span></p>
                             <p>Fin : <span th:text="${#temporals.format(b.endTime, 'dd/MM/yyyy HH:mm')}"></span></p>
                             <div class="action">
-                                <a th:href="@{/booking/{id}(id=${b.room.id})}" class="btn-detail" style="text-decoration: none; display: inline-block; text-align: center;">Voir salle</a>
-                                <form th:action="@{/booking/cancel/{id}(id=${b.id})}" method="post" style="flex: 1;">
-                                    <button type="submit" class="btn-cancel" style="width: 100%;" onclick="return confirm('Voulez-vous vraiment annuler cette réservation ?')">Annuler</button>
+                                <a th:href="@{/booking/{id}(id=${b.room.id})}" class="btn-detail">Voir salle</a>
+                                <form th:action="@{/booking/cancel/{id}(id=${b.id})}" method="post">
+                                    <button type="submit" class="btn-cancel" onclick="return confirm('Voulez-vous vraiment annuler cette réservation ?')">Annuler</button>
                                 </form>
                             </div>
                         </div>

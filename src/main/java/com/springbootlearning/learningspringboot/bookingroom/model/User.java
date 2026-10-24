@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +49,8 @@ public class User {
     // est validée sur RegisterFormDto avant l'encodage.
     @JsonIgnore
     @NotBlank(message = "Le mot de passe est obligatoire")
-    @Length(min = 8, max = 100, message = "Le mot de passe doit contenir entre 8 et 100 caracteres")
-    @Column(nullable = false)
+    @Size(max = 100, message = "Le mot de passe stocke ne doit pas depasser 100 caracteres")
+    @Column(nullable = false, length = 100)
     private String password;
 
     @Enumerated(EnumType.STRING)

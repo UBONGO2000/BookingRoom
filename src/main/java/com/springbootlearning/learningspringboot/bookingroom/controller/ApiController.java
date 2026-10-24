@@ -11,6 +11,7 @@ import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
+import com.springbootlearning.learningspringboot.bookingroom.security.LoginAttemptService;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,14 +47,16 @@ public class ApiController {
     private final RoomService roomService;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final LoginAttemptService loginAttemptService;
 
-    public ApiController(RoomRepository roomRepository, 
-                         BookingRepository bookingRepository, 
+    public ApiController(RoomRepository roomRepository,
+                         BookingRepository bookingRepository,
                          UserRepository userRepository,
                          BookingService bookingService,
                          RoomService roomService,
                          AuthenticationManager authenticationManager,
-                         SecurityContextRepository securityContextRepository) {
+                         SecurityContextRepository securityContextRepository,
+                         LoginAttemptService loginAttemptService) {
         this.roomRepository = roomRepository;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
@@ -61,6 +64,7 @@ public class ApiController {
         this.roomService = roomService;
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @GetMapping("/csrf")
@@ -79,10 +83,17 @@ public class ApiController {
                     .body(Map.of("error", "Nom d'utilisateur et mot de passe requis"));
         }
 
+        if (loginAttemptService.isBlocked(body.username())) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("error", "Trop de tentatives échouées. Réessayez plus tard."));
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(body.username(), body.password())
             );
+
+            loginAttemptService.recordSuccess(body.username());
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authentication);
@@ -93,6 +104,7 @@ public class ApiController {
 
             return ResponseEntity.ok(Map.of("username", authentication.getName()));
         } catch (AuthenticationException ex) {
+            loginAttemptService.recordFailure(body.username());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Identifiants invalides"));
         }

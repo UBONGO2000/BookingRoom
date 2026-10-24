@@ -4,7 +4,7 @@
 
 <div th:fragment="navbar">
     <nav>
-        <a th:href="@{/}" class="logo">RoomBooker</a>
+        <a th:href="@{/}" class="logo">BookingRoom</a>
         <div class="menu">
             <ul>
                 <li><a th:href="@{/dashboard}">Tableau de Bord</a></li>
@@ -19,7 +19,7 @@
             </button>
             <div class="profile" th:if="${user != null}">
                 <span th:text="${'Hello, ' + user.firstname}">Hello, User</span>
-                <form th:action="@{/logout}" method="post" style="display: inline;">
+                <form th:action="@{/logout}" method="post" class="logout-form">
                     <button type="submit" class="btn-logout">Déconnexion</button>
                 </form>
             </div>

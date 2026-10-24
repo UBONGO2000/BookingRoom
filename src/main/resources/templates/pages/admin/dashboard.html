@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - RoomBooker</title>
+    <title>Admin Dashboard - BookingRoom</title>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/dashboard.css}">
-    <style>
-        .admin-section { padding: 2rem; }
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--bg-card); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); color: var(--text-main); }
-        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        .data-table th { background-color: var(--bg-main); font-weight: 600; color: var(--text-muted); }
-        .status-badge { padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-        .status-available { background-color: #dcfce7; color: #166534; }
-        .status-unavailable { background-color: #fee2e2; color: #991b1b; }
-    </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <main class="admin-section">
-    <h1>Administration</h1>
+    <header class="admin-header">
+        <h1>Administration</h1>
+        <p>Gérez les salles et supervisez les réservations de l'organisation.</p>
+    </header>
 
     <section>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div class="section-header">
             <h2>Gestion des Salles</h2>
             <a th:href="@{/admin/rooms/new}" class="btn btn-primary">Ajouter une salle</a>
         </div>
-        <table class="data-table">
+
+        <div th:if="${#lists.isEmpty(rooms)}" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M4 9v10.9c0 .61.49 1.1 1.1 1.1H13V4H5.1C4.49 4 4 4.49 4 5v4m10.5 6c.83 0 1.5-1.12 1.5-2.5S15.33 10 14.5 10s-1.5 1.12-1.5 2.5.67 2.5 1.5 2.5M15 3v2h4.97V21H15v2h7V3h-7z"/>
+                </svg>
+            </div>
+            <h3>Aucune salle enregistrée</h3>
+            <p>Ajoutez votre première salle pour commencer à gérer les réservations.</p>
+            <a th:href="@{/admin/rooms/new}" class="btn btn-primary">Ajouter une salle</a>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(rooms)}" class="data-table">
             <thead>
                 <tr>
                     <th>Nom</th>
@@ -47,7 +53,7 @@
                     <td>
                         <div th:if="${room.available}">
                             <span class="status-badge status-available">Actif</span>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                            <div class="availability-window">
                                 <span th:if="${room.availableFrom}" th:text="${'De: ' + #temporals.format(room.availableFrom, 'dd/MM HH:mm')}"></span>
                                 <span th:if="${room.availableUntil}" th:text="${' À: ' + #temporals.format(room.availableUntil, 'dd/MM HH:mm')}"></span>
                             </div>
@@ -55,13 +61,13 @@
                         <span th:unless="${room.available}" class="status-badge status-unavailable">Maintenance</span>
                     </td>
                     <td>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;">Modifier</a>
-                            <form th:action="@{/admin/rooms/toggle-availability/{id}(id=${room.id})}" method="post" style="display: inline;">
-                                <button type="submit" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" th:text="${room.available ? 'Désactiver' : 'Activer'}">Toggle</button>
+                        <div class="actions-row">
+                            <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-outline btn-sm">Modifier</a>
+                            <form th:action="@{/admin/rooms/toggle-availability/{id}(id=${room.id})}" method="post" class="inline-form">
+                                <button type="submit" class="btn btn-secondary btn-sm" th:text="${room.available ? 'Désactiver' : 'Activer'}">Toggle</button>
                             </form>
-                            <form th:action="@{/admin/rooms/delete/{id}(id=${room.id})}" method="post" style="display: inline;" onsubmit="return confirm('Supprimer cette salle ?')">
-                                <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer</button>
+                            <form th:action="@{/admin/rooms/delete/{id}(id=${room.id})}" method="post" class="inline-form" onsubmit="return confirm('Supprimer cette salle ?')">
+                                <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
                             </form>
                         </div>
                     </td>
@@ -70,17 +76,27 @@
         </table>
     </section>
 
-    <section style="margin-top: 3rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+    <section class="section-spaced">
+        <div class="section-header">
             <h2>Réservations</h2>
-            <form th:action="@{/admin}" method="get" class="filter-form" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <input type="text" name="roomName" placeholder="Filtrer par salle..." th:value="${roomName}" style="padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main);">
-                <input type="text" name="username" placeholder="Filtrer par utilisateur..." th:value="${username}" style="padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main);">
+            <form th:action="@{/admin}" method="get" class="filter-form">
+                <input type="text" name="roomName" placeholder="Filtrer par salle..." th:value="${roomName}">
+                <input type="text" name="username" placeholder="Filtrer par utilisateur..." th:value="${username}">
                 <button type="submit" class="btn btn-primary">Filtrer</button>
                 <a th:href="@{/admin}" class="btn btn-outline">Réinitialiser</a>
             </form>
         </div>
-        <table class="data-table">
+        <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                </svg>
+            </div>
+            <h3>Aucune réservation trouvée</h3>
+            <p>Aucune réservation ne correspond à ces filtres pour le moment.</p>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(bookings)}" class="data-table">
             <thead>
                 <tr>
                     <th>Salle</th>
@@ -100,7 +116,7 @@
                     <td th:text="${#temporals.format(booking.endTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 14:00</td>
                     <td>
                         <form th:action="@{/booking/cancel/{id}(id=${booking.id})}" method="post">
-                            <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="return confirm('Annuler cette réservation ?')">Annuler</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Annuler cette réservation ?')">Annuler</button>
                         </form>
                     </td>
                 </tr>
