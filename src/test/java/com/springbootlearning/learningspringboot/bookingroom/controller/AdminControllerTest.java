@@ -87,4 +87,11 @@ class AdminControllerTest {
         mockMvc.perform(get("/admin/rooms/delete/1"))
                 .andExpect(status().is4xxClientError());
     }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void editRoomForm_shouldReturn404_forUnknownRoom() throws Exception {
+        mockMvc.perform(get("/admin/rooms/edit/999999"))
+                .andExpect(status().isNotFound());
+    }
 }

@@ -67,12 +67,12 @@ class BookingControllerTest {
 
     @Test
     @WithMockUser(username = "mallory", roles = "USER")
-    void cancelBooking_shouldNotCancel_whenNotOwnerNorAdmin() throws Exception {
+    void cancelBooking_shouldBeForbidden_whenNotOwnerNorAdmin() throws Exception {
         User owner = userService.register("Alice", "Owner", "alice_owner_1", "alice_owner_1@test.com", "Password@123");
         Booking booking = createBookingFor(owner);
 
         mockMvc.perform(post("/booking/cancel/" + booking.getId()).with(csrf()))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isForbidden());
 
         assertThat(bookingRepository.findById(booking.getId())).isPresent();
     }
@@ -112,11 +112,10 @@ class BookingControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void bookingDetail_shouldRedirect_forNonexistentRoom() throws Exception {
-        // Avant le fix : un id inconnu faisait planter le rendu du template avec une
-        // SpelEvaluationException (room.available sur un attribut jamais peuple).
+    void bookingDetail_shouldReturn404_forNonexistentRoom() throws Exception {
+        // Un id inconnu ne redirige plus silencieusement : il repond un vrai 404.
         mockMvc.perform(get("/booking/999999"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isNotFound());
     }
 
     @Test

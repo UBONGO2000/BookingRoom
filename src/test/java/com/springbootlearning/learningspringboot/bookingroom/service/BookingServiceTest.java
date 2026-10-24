@@ -91,6 +91,21 @@ class BookingServiceTest {
         verify(bookingRepository).findByUserUsername(username);
     }
 
+    @Test
+    void getUpcomingBookingsByUser_shouldCallRepositoryWithCurrentTime() {
+        // Given
+        when(bookingRepository.findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(eq("alice"), any(LocalDateTime.class)))
+                .thenReturn(Collections.singletonList(booking));
+
+        // When
+        List<Booking> result = bookingService.getUpcomingBookingsByUser("alice");
+
+        // Then
+        assertThat(result).containsExactly(booking);
+        verify(bookingRepository)
+                .findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(eq("alice"), any(LocalDateTime.class));
+    }
+
     // ==========================================
     // TEST : getBookingsByRoom
     // ==========================================

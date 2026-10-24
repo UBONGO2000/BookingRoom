@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -127,5 +128,40 @@ class ApiControllerTest {
         mockMvc.perform(get("/admin"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Salle API")));
+    }
+
+    @Test
+    @WithMockUser(username = "apiuser", roles = "USER")
+    void statsOverviewShouldBeForbiddenForNonAdmin() throws Exception {
+        mockMvc.perform(get("/api/stats/overview"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Accès refusé"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void statsOverviewShouldSucceedForAdmin() throws Exception {
+        mockMvc.perform(get("/api/stats/overview"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalRooms").isNumber())
+                .andExpect(jsonPath("$.totalBookings").isNumber());
+    }
+
+    @Test
+    void dashboardShouldHidePastBookings() throws Exception {
+        User user = userRepository.findByUsername("apiuser").orElseThrow();
+        Room room = roomRepository.findByNameIgnoreCase("Salle API").orElseThrow();
+        LocalDateTime pastStart = LocalDateTime.now().minusDays(2);
+        Booking pastBooking = bookingRepository.save(new Booking(
+                "Ancienne reunion", pastStart, pastStart.plusHours(1), user, room));
+
+        try {
+            mockMvc.perform(get("/dashboard"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Reunion API")))
+                    .andExpect(content().string(not(containsString("Ancienne reunion"))));
+        } finally {
+            bookingRepository.delete(pastBooking);
+        }
     }
 }

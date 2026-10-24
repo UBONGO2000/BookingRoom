@@ -40,7 +40,7 @@ public class HomeController {
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> {
                 model.addAttribute("user", user);
-                model.addAttribute("bookings", bookingService.getBookingsByUser(user.getUsername()));
+                model.addAttribute("bookings", bookingService.getUpcomingBookingsByUser(user.getUsername()));
             });
         }
         return "pages/user/dashboard";

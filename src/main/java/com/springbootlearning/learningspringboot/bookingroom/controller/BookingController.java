@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.controller;
 
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
+import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
@@ -8,15 +9,17 @@ import com.springbootlearning.learningspringboot.bookingroom.service.BookingServ
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping
@@ -39,7 +42,7 @@ public class BookingController {
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
         }
-        Page<Room> roomPage = roomService.getAllRooms(PageRequest.of(page, 6));
+        Page<Room> roomPage = roomService.getAvailableRooms(PageRequest.of(page, 6));
         model.addAttribute("rooms", roomPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", roomPage.getTotalPages());
@@ -69,16 +72,14 @@ public class BookingController {
 
     @GetMapping("/booking/{id}")
     public String bookingDetail(@PathVariable Long id, Model model, Principal principal, @RequestParam(required = false) String error) {
-        Optional<Room> room = roomService.getRoomById(id);
-        if (room.isEmpty()) {
-            return "redirect:/booking";
-        }
+        Room room = roomService.getRoomById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette salle n'existe pas."));
 
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
         }
-        model.addAttribute("room", room.get());
-        model.addAttribute("bookings", bookingService.getBookingsByRoom(room.get()));
+        model.addAttribute("room", room);
+        model.addAttribute("bookings", bookingService.getBookingsByRoom(room));
         if (error != null) {
             model.addAttribute("errorMessage", error);
         }
@@ -112,18 +113,23 @@ public class BookingController {
 
     @PostMapping("/booking/cancel/{id}")
     public String cancelBooking(@PathVariable Long id, Principal principal) {
-        if (principal != null) {
-            bookingService.getBookingById(id).ifPresent(booking -> {
-                // Vérifier si l'utilisateur est le propriétaire ou un admin
-                boolean isAdmin = userRepository.findByUsername(principal.getName())
-                        .map(u -> u.getRole().name().equals("ADMIN"))
-                        .orElse(false);
-                
-                if (booking.getUser().getUsername().equals(principal.getName()) || isAdmin) {
-                    bookingService.cancelBooking(id);
-                }
-            });
+        if (principal == null) {
+            throw new AccessDeniedException("Authentification requise pour annuler une réservation.");
         }
+
+        Booking booking = bookingService.getBookingById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette réservation n'existe pas."));
+
+        // Vérifier si l'utilisateur est le propriétaire ou un admin
+        boolean isAdmin = userRepository.findByUsername(principal.getName())
+                .map(u -> u.getRole().name().equals("ADMIN"))
+                .orElse(false);
+
+        if (!booking.getUser().getUsername().equals(principal.getName()) && !isAdmin) {
+            throw new AccessDeniedException("Vous ne pouvez pas annuler la réservation d'un autre utilisateur.");
+        }
+
+        bookingService.cancelBooking(id);
         return "redirect:/dashboard";
     }
 }

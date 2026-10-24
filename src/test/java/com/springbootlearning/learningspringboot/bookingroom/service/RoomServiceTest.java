@@ -164,6 +164,36 @@ class RoomServiceTest {
         assertThat(result.getTotalElements()).isEqualTo(3); // Total est 3
     }
 
+    @Test
+    void searchRooms_shouldExcludeRoomsInMaintenance() {
+        // Given
+        Room available = new Room("Disponible", "desc", 10, "adr", true, false, false);
+        Room maintenance = new Room("Fermee", "desc", 10, "adr", true, false, false);
+        maintenance.setAvailable(false);
+        when(roomRepository.findAll()).thenReturn(Arrays.asList(available, maintenance));
+
+        // When
+        List<Room> result = roomService.searchRooms(new RoomSearchDto());
+
+        // Then
+        assertThat(result).containsExactly(available);
+    }
+
+    @Test
+    void getAvailableRooms_shouldQueryOnlyAvailableRooms() {
+        // Given
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Room> page = new PageImpl<>(List.of(room));
+        when(roomRepository.findByAvailableTrue(pageable)).thenReturn(page);
+
+        // When
+        Page<Room> result = roomService.getAvailableRooms(pageable);
+
+        // Then
+        assertThat(result.getContent()).containsExactly(room);
+        verify(roomRepository).findByAvailableTrue(pageable);
+    }
+
     // ==========================================
     // TESTS ECRITURE / MODIFICATION
     // ==========================================

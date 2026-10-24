@@ -26,6 +26,12 @@ public class BookingService {
         return bookingRepository.findByUserUsername(username);
     }
 
+    // Dashboard : uniquement les reservations a venir (les anciennes restent en base
+    // pour l'historique admin, mais n'encombrent plus la page utilisateur).
+    public List<Booking> getUpcomingBookingsByUser(String username) {
+        return bookingRepository.findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(username, LocalDateTime.now());
+    }
+
     public List<Booking> getBookingsByRoom(Room room) {
         return bookingRepository.findByRoomAndEndTimeAfterOrderByStartTimeAsc(room, LocalDateTime.now());
     }

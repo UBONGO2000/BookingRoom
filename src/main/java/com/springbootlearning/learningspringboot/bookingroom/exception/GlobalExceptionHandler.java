@@ -7,11 +7,14 @@ import com.springbootlearning.learningspringboot.bookingroom.controller.HomeCont
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 // Scoped to the HTML page controllers only - ApiController (REST) has its own
@@ -37,6 +40,28 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public String handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex, Model model) {
         model.addAttribute("errorMessage", "Cette action n'est pas autorisée avec cette méthode HTTP.");
+        return "error";
+    }
+
+    // 404 (et autres statuts) explicitement leves par les controleurs : sans ce
+    // handler, ResponseStatusException tomberait dans le handler RuntimeException
+    // ci-dessous et repondrait 200 avec une page d'erreur.
+    @ExceptionHandler(ResponseStatusException.class)
+    public ModelAndView handleResponseStatusException(ResponseStatusException ex, Model model) {
+        log.warn("Requete refusee : {} - {}", ex.getStatusCode().value(), ex.getReason());
+        model.addAttribute("errorMessage",
+                ex.getReason() != null ? ex.getReason() : "La ressource demandée est introuvable.");
+        ModelAndView modelAndView = new ModelAndView("error");
+        modelAndView.setStatus(ex.getStatusCode());
+        return modelAndView;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAccessDenied(AccessDeniedException ex, Model model) {
+        log.warn("Acces refuse : {}", ex.getMessage());
+        model.addAttribute("errorMessage",
+                ex.getMessage() != null ? ex.getMessage() : "Vous n'avez pas les droits nécessaires.");
         return "error";
     }
 

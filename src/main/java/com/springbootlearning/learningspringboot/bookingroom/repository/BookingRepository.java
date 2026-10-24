@@ -31,6 +31,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @EntityGraph(attributePaths = {"room", "user"})
     List<Booking> findByUserUsername(String username);
 
+    @EntityGraph(attributePaths = {"room", "user"})
+    List<Booking> findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(String username, LocalDateTime now);
+
     @Query("SELECT b FROM Booking b WHERE b.room.id = :roomId " +
            "AND ((b.startTime < :endTime AND b.endTime > :startTime))")
     List<Booking> findOverlappingBookings(@Param("roomId") Long roomId, 

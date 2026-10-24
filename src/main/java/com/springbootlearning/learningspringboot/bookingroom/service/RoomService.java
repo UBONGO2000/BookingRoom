@@ -29,8 +29,14 @@ public class RoomService {
         return roomRepository.findAll(pageable);
     }
 
+    // Liste publique : une salle en maintenance ne doit pas etre proposee a la reservation.
+    public Page<Room> getAvailableRooms(Pageable pageable) {
+        return roomRepository.findByAvailableTrue(pageable);
+    }
+
     public Page<Room> searchRooms(RoomSearchDto criteria, Pageable pageable) {
         List<Room> allFound = roomRepository.findAll().stream()
+                .filter(r -> Boolean.TRUE.equals(r.getAvailable()))
                 .filter(r -> criteria.getName() == null || criteria.getName().isBlank() || r.getName().toLowerCase().contains(criteria.getName().toLowerCase()))
                 .filter(r -> criteria.getCapacity() == null || r.getCapacity() >= criteria.getCapacity())
                 .filter(r -> !criteria.isProjector() || r.getProjector())
@@ -50,6 +56,7 @@ public class RoomService {
 
     public List<Room> searchRooms(RoomSearchDto criteria) {
         return roomRepository.findAll().stream()
+                .filter(r -> Boolean.TRUE.equals(r.getAvailable()))
                 .filter(r -> criteria.getName() == null || criteria.getName().isBlank() || r.getName().toLowerCase().contains(criteria.getName().toLowerCase()))
                 .filter(r -> criteria.getCapacity() == null || r.getCapacity() >= criteria.getCapacity())
                 .filter(r -> !criteria.isProjector() || r.getProjector())

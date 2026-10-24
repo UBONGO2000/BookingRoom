@@ -139,7 +139,7 @@ Les routes `/api/**` s'appuient sur la même session que le site (pas de JWT pou
 - `GET /api/rooms/{id}` — détail d'une salle (le champ `evaluations` est un placeholder, la fonctionnalité n'existe pas encore côté modèle).
 - `GET /api/reservations/me` (alias `/api/my-bookings`) — mes réservations.
 - `POST /api/reservations` — créer une réservation (`title`, `startTime`, `endTime`, `roomId`, dates au format ISO).
-- `GET /api/stats/overview` — quelques statistiques globales.
+- `GET /api/stats/overview` — statistiques globales (réservé au rôle ADMIN).
 - `GET /api/rooms/available-now` — salles libres dans l'heure qui vient.
 - `GET /api/me` — mon profil.
 
@@ -171,13 +171,13 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-72 tests répartis sur 13 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+79 tests répartis sur 13 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 74,4 % | 72,2 % |
-| Couche service | 87,1 % | 96,6 % |
-| Couche contrôleur | 51,9 % | 55,8 % |
+| Ensemble du projet | 76,7 % | 74,4 % |
+| Couche service | 87,7 % | 96,8 % |
+| Couche contrôleur | 57,6 % | 60,7 % |
 
 La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité). Les contrôleurs le sont beaucoup moins pour l'instant — j'ai ciblé volontairement les deux points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, et qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR). `AuthController` et `HomeController` n'ont pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
 
