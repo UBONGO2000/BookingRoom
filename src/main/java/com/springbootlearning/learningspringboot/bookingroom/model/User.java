@@ -1,5 +1,6 @@
 package com.springbootlearning.learningspringboot.bookingroom.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
@@ -43,10 +44,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    // Le mot de passe est stocké hashé (BCrypt) : la politique de complexité
+    // est validée sur RegisterFormDto avant l'encodage.
+    @JsonIgnore
     @NotBlank(message = "Le mot de passe est obligatoire")
     @Length(min = 8, max = 100, message = "Le mot de passe doit contenir entre 8 et 100 caracteres")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+", 
-             message = "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractere special")
     @Column(nullable = false)
     private String password;
 
@@ -54,6 +56,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<Booking>();
 

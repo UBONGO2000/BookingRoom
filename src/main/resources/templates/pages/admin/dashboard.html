@@ -57,8 +57,12 @@
                     <td>
                         <div style="display: flex; gap: 0.5rem;">
                             <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;">Modifier</a>
-                            <a th:href="@{/admin/rooms/toggle-availability/{id}(id=${room.id})}" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" th:text="${room.available ? 'Désactiver' : 'Activer'}">Toggle</a>
-                            <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="return confirm('Supprimer cette salle ?')">Supprimer</a>
+                            <form th:action="@{/admin/rooms/toggle-availability/{id}(id=${room.id})}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" th:text="${room.available ? 'Désactiver' : 'Activer'}">Toggle</button>
+                            </form>
+                            <form th:action="@{/admin/rooms/delete/{id}(id=${room.id})}" method="post" style="display: inline;" onsubmit="return confirm('Supprimer cette salle ?')">
+                                <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer</button>
+                            </form>
                         </div>
                     </td>
                 </tr>

@@ -1,6 +1,10 @@
 package com.springbootlearning.learningspringboot.bookingroom.controller;
 
+import com.springbootlearning.learningspringboot.bookingroom.dto.BookingResponse;
+import com.springbootlearning.learningspringboot.bookingroom.dto.LoginRequest;
+import com.springbootlearning.learningspringboot.bookingroom.dto.RoomResponse;
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
+import com.springbootlearning.learningspringboot.bookingroom.dto.UserResponse;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
@@ -9,13 +13,20 @@ import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepo
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -23,7 +34,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -35,41 +45,61 @@ public class ApiController {
     private final BookingService bookingService;
     private final RoomService roomService;
     private final AuthenticationManager authenticationManager;
+    private final SecurityContextRepository securityContextRepository;
 
     public ApiController(RoomRepository roomRepository, 
                          BookingRepository bookingRepository, 
                          UserRepository userRepository,
                          BookingService bookingService,
                          RoomService roomService,
-                         AuthenticationManager authenticationManager) {
+                         AuthenticationManager authenticationManager,
+                         SecurityContextRepository securityContextRepository) {
         this.roomRepository = roomRepository;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.bookingService = bookingService;
         this.roomService = roomService;
         this.authenticationManager = authenticationManager;
+        this.securityContextRepository = securityContextRepository;
+    }
+
+    @GetMapping("/csrf")
+    public ResponseEntity<Map<String, String>> csrf(HttpServletRequest request) {
+        CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        return ResponseEntity.ok(Map.of("token", token.getToken()));
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
-        String username = credentials.get("username");
-        String password = credentials.get("password");
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest body,
+                                                     HttpServletRequest request,
+                                                     HttpServletResponse response) {
+        if (body == null || body.username() == null || body.username().isBlank()
+                || body.password() == null || body.password().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Nom d'utilisateur et mot de passe requis"));
+        }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(body.username(), body.password())
+            );
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Authentification réussie");
-        response.put("username", username);
-        // Note: Dans une vraie application, on retournerait un JWT ici.
-        // Ici, on utilise la session Spring Security.
-        return ResponseEntity.ok(response);
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authentication);
+            SecurityContextHolder.setContext(context);
+
+            securityContextRepository.saveContext(context, request, response);
+            request.changeSessionId();
+
+            return ResponseEntity.ok(Map.of("username", authentication.getName()));
+        } catch (AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Identifiants invalides"));
+        }
     }
 
     @GetMapping("/rooms")
-    public ResponseEntity<Page<Room>> getRooms(
+    public ResponseEntity<Page<RoomResponse>> getRooms(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer capacity,
             @RequestParam(defaultValue = "false") boolean projector,
@@ -79,7 +109,8 @@ public class ApiController {
             @RequestParam(defaultValue = "10") int size) {
         
         RoomSearchDto criteria = new RoomSearchDto(name, capacity, projector, whiteboard, videoconferencing);
-        Page<Room> rooms = roomService.searchRooms(criteria, PageRequest.of(page, size));
+        Page<RoomResponse> rooms = roomService.searchRooms(criteria, PageRequest.of(page, size))
+                .map(RoomResponse::from);
         return ResponseEntity.ok(rooms);
     }
 
@@ -88,7 +119,7 @@ public class ApiController {
         return roomService.getRoomById(id)
                 .map(room -> {
                     Map<String, Object> response = new HashMap<>();
-                    response.put("room", room);
+                    response.put("room", RoomResponse.from(room));
                     // Le système d'évaluations n'est pas encore implémenté dans le modèle de données,
                     // donc nous retournons une liste vide pour l'instant comme placeholder.
                     response.put("evaluations", List.of()); 
@@ -98,23 +129,17 @@ public class ApiController {
     }
 
     @GetMapping({"/reservations/me", "/my-bookings"})
-    public ResponseEntity<List<Map<String, Object>>> getMyBookings(Principal principal) {
+    public ResponseEntity<List<BookingResponse>> getMyBookings(Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
         
-        List<Booking> bookings = bookingService.getBookingsByUser(principal.getName());
-        List<Map<String, Object>> result = bookings.stream().map(b -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", b.getId());
-            map.put("title", b.getTitle());
-            map.put("startTime", b.getStartTime());
-            map.put("endTime", b.getEndTime());
-            map.put("roomName", b.getRoom().getName());
-            return map;
-        }).collect(Collectors.toList());
+        List<BookingResponse> bookings = bookingService.getBookingsByUser(principal.getName())
+                .stream()
+                .map(BookingResponse::from)
+                .toList();
         
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(bookings);
     }
 
     @PostMapping("/reservations")
@@ -163,32 +188,25 @@ public class ApiController {
     }
 
     @GetMapping("/rooms/available-now")
-    public ResponseEntity<List<Room>> getRoomsAvailableNow() {
-        List<Room> availableRooms = roomRepository.findAll().stream()
+    public ResponseEntity<List<RoomResponse>> getRoomsAvailableNow() {
+        List<RoomResponse> availableRooms = roomRepository.findAll().stream()
                 .filter(Room::getAvailable)
                 .filter(room -> bookingService.isRoomAvailable(room.getId(), 
                         java.time.LocalDateTime.now(), 
                         java.time.LocalDateTime.now().plusHours(1)))
-                .collect(Collectors.toList());
+                .map(RoomResponse::from)
+                .toList();
         return ResponseEntity.ok(availableRooms);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> getCurrentUser(Principal principal) {
+    public ResponseEntity<UserResponse> getCurrentUser(Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
         
         return userRepository.findByUsername(principal.getName())
-                .map(user -> {
-                    Map<String, Object> userData = new HashMap<>();
-                    userData.put("username", user.getUsername());
-                    userData.put("email", user.getEmail());
-                    userData.put("firstname", user.getFirstname());
-                    userData.put("lastname", user.getLastname());
-                    userData.put("role", user.getRole());
-                    return ResponseEntity.ok(userData);
-                })
+                .map(user -> ResponseEntity.ok(UserResponse.from(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

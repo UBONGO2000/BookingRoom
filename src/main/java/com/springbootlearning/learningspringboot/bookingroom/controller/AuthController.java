@@ -1,7 +1,6 @@
 package com.springbootlearning.learningspringboot.bookingroom.controller;
 
-import com.springbootlearning.learningspringboot.bookingroom.dto.UserDto;
-import com.springbootlearning.learningspringboot.bookingroom.model.User;
+import com.springbootlearning.learningspringboot.bookingroom.dto.RegisterFormDto;
 import com.springbootlearning.learningspringboot.bookingroom.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,34 +29,35 @@ public class AuthController {
 
     @GetMapping("/register")
     public String register(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("user", new RegisterFormDto());
         return "pages/auth/register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@Valid @ModelAttribute("user") User user, BindingResult result, Model model) {
+    public String registerUser(@Valid @ModelAttribute("user") RegisterFormDto form,
+                               BindingResult result, Model model) {
         if (result.hasErrors()) {
             return "pages/auth/register";
         }
-        
+
         // Check if username already exists
-        if (userService.findByUsername(user.getUsername()).isPresent()) {
+        if (userService.findByUsername(form.getUsername()).isPresent()) {
             model.addAttribute("usernameError", "Ce nom d'utilisateur est deja utilise");
             return "pages/auth/register";
         }
-        
+
         // Check if email already exists
-        if (userService.findByEmail(user.getEmail()).isPresent()) {
+        if (userService.findByEmail(form.getEmail()).isPresent()) {
             model.addAttribute("emailError", "Cette adresse email est deja utilisee");
             return "pages/auth/register";
         }
-        
+
         userService.register(
-                user.getFirstname(),
-                user.getLastname(),
-                user.getUsername(),
-                user.getEmail(),
-                passwordEncoder.encode(user.getPassword())
+                form.getFirstname(),
+                form.getLastname(),
+                form.getUsername(),
+                form.getEmail(),
+                passwordEncoder.encode(form.getPassword())
         );
         return "redirect:/login?registered";
     }
