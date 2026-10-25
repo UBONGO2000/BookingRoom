@@ -2,7 +2,7 @@
 
 Un projet Spring Boot que j'ai monté pour progresser sur l'écosystème Spring (Security, Data JPA, Thymeleaf...) en construisant quelque chose d'un peu plus consistant qu'un CRUD de démo : un outil de réservation de salles de réunion, avec comptes utilisateurs, espace admin, et une vraie couche de sécurité derrière.
 
-Stack : Java 17, Spring Boot, Spring Security, Thymeleaf, PostgreSQL, Docker, tests automatisés.
+Stack : Java 21, Spring Boot 3.5, Spring Security, Thymeleaf, PostgreSQL, Docker, tests automatisés.
 
 ***
 
@@ -47,7 +47,7 @@ Architecture en couches assez classique pour du Spring Boot :
 
 ## Stack technique
 
-- **Backend** : Spring Boot (Java 17), Spring MVC, Spring Data JPA, Spring Security, Spring Validation.
+- **Backend** : Spring Boot 3.5 (Java 21), Spring MVC, Spring Data JPA, Spring Security, Spring Validation.
 - **Frontend** : Thymeleaf + CSS fait main (pas de Bootstrap ni Tailwind).
 - **Base de données** : PostgreSQL (H2 en mémoire pour les tests).
 - **Conteneurisation** : Docker.
@@ -59,7 +59,7 @@ Architecture en couches assez classique pour du Spring Boot :
 
 ### Avant de commencer
 
-- Java 17
+- Java 21
 - Maven (ou le wrapper `./mvnw` déjà dans le repo, pas besoin d'installer Maven à part)
 - Docker si tu veux éviter d'installer PostgreSQL à la main
 
