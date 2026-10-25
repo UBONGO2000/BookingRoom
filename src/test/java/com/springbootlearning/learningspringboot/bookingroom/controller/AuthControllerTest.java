@@ -49,7 +49,11 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("pages/auth/register"))
                 .andExpect(model().attributeHasFieldErrors("user", "passwordConfirmed"))
-                .andExpect(content().string(containsString("Les mots de passe ne correspondent pas")));
+                .andExpect(content().string(containsString("Les mots de passe ne correspondent pas")))
+                .andExpect(content().string(containsString("href=\"/css/auth.css\"")))
+                .andExpect(content().string(containsString("/js/theme-init.js")))
+                .andExpect(content().string(containsString("class=\"skip-link\"")))
+                .andExpect(content().string(containsString("id=\"main-content\"")));
 
         assertThat(userRepository.findByUsername("alice_p19")).isEmpty();
     }

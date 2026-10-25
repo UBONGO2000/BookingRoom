@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  En-tete commun : metadonnees, theme applique avant le premier rendu
+  (script externe, compatible CSP sans inline) et scripts differes.
+  Les pages ajoutent leurs feuilles de style specifiques via th:insert.
+-->
+<th:block th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">BookingRoom</title>
+    <script th:src="@{/js/theme-init.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <script th:src="@{/js/theme.js}" defer></script>
+    <script th:src="@{/js/confirm.js}" defer></script>
+</th:block>
+
+</body>
+</html>

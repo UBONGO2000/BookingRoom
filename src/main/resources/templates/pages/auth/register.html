@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - BookingRoom</title>
-    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <th:block th:insert="~{fragments/head :: head('Inscription - BookingRoom')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
 <body>
+
+<a class="skip-link" href="#main-content">Aller au contenu</a>
 
 <div class="auth-layout">
     <aside class="auth-brand">
@@ -27,7 +26,7 @@
         </div>
     </aside>
 
-    <main class="auth-panel">
+    <main class="auth-panel" id="main-content" tabindex="-1">
         <div class="auth-card">
             <a th:href="@{/}" class="auth-logo auth-logo--mobile">BookingRoom</a>
 
@@ -46,7 +45,7 @@
                             </svg>
                             <input type="text" id="firstname" name="firstname" placeholder="Jean" autocomplete="given-name" th:field="*{firstname}">
                         </div>
-                        <span th:if="${#fields.hasErrors('firstname')}" class="error-message" th:errors="*{firstname}"></span>
+                        <span th:if="${#fields.hasErrors('firstname')}" class="error-message" role="alert" th:errors="*{firstname}"></span>
                     </div>
 
                     <!-- Lastname -->
@@ -58,7 +57,7 @@
                             </svg>
                             <input type="text" id="lastname" name="lastname" placeholder="Dupont" autocomplete="family-name" th:field="*{lastname}">
                         </div>
-                        <span th:if="${#fields.hasErrors('lastname')}" class="error-message" th:errors="*{lastname}"></span>
+                        <span th:if="${#fields.hasErrors('lastname')}" class="error-message" role="alert" th:errors="*{lastname}"></span>
                     </div>
                 </div>
 
@@ -71,7 +70,7 @@
                         </svg>
                         <input type="text" id="username" name="username" placeholder="jean.dupont24" autocomplete="username" th:field="*{username}">
                     </div>
-                    <span th:if="${#fields.hasErrors('username')}" class="error-message" th:errors="*{username}"></span>
+                    <span th:if="${#fields.hasErrors('username')}" class="error-message" role="alert" th:errors="*{username}"></span>
                 </div>
 
                 <!-- Email -->
@@ -83,7 +82,7 @@
                         </svg>
                         <input type="email" id="email" name="email" placeholder="jean@exemple.com" autocomplete="email" th:field="*{email}">
                     </div>
-                    <span th:if="${#fields.hasErrors('email')}" class="error-message" th:errors="*{email}"></span>
+                    <span th:if="${#fields.hasErrors('email')}" class="error-message" role="alert" th:errors="*{email}"></span>
                 </div>
 
                 <!-- Password -->
@@ -95,7 +94,7 @@
                         </svg>
                         <input type="password" id="password" name="password" placeholder="Min. 8 caractères" autocomplete="new-password" th:field="*{password}">
                     </div>
-                    <span th:if="${#fields.hasErrors('password')}" class="error-message" th:errors="*{password}"></span>
+                    <span th:if="${#fields.hasErrors('password')}" class="error-message" role="alert" th:errors="*{password}"></span>
                     <small class="help-text">Au moins: 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial</small>
                 </div>
 
@@ -108,8 +107,8 @@
                         </svg>
                         <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Répétez le mot de passe" autocomplete="new-password" th:field="*{confirmPassword}">
                     </div>
-                    <span th:if="${#fields.hasErrors('confirmPassword')}" class="error-message" th:errors="*{confirmPassword}"></span>
-                    <span th:if="${#fields.hasErrors('passwordConfirmed')}" class="error-message" th:errors="*{passwordConfirmed}"></span>
+                    <span th:if="${#fields.hasErrors('confirmPassword')}" class="error-message" role="alert" th:errors="*{confirmPassword}"></span>
+                    <span th:if="${#fields.hasErrors('passwordConfirmed')}" class="error-message" role="alert" th:errors="*{passwordConfirmed}"></span>
                 </div>
 
                 <button type="submit" class="auth-submit">S'inscrire</button>
@@ -121,8 +120,6 @@
         </div>
     </main>
 </div>
-
-<script th:src="@{/js/theme.js}"></script>
 
 </body>
 </html>

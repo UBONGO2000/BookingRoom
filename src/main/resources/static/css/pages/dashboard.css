@@ -84,23 +84,6 @@ main {
     color: var(--text-muted);
 }
 
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.status-available {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.status-unavailable {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -158,25 +141,4 @@ main {
     justify-content: center;
     gap: 0.5rem;
     margin-top: 2rem;
-}
-
-.btn-page {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    background: var(--bg-card);
-    color: var(--text-main);
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.btn-page:hover {
-    background: var(--bg-hover);
-    border-color: var(--primary);
-}
-
-.btn-page.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
 }

@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord - BookingRoom</title>
-    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <th:block th:insert="~{fragments/head :: head('Tableau de Bord - BookingRoom')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/card.css}">
     <link rel="stylesheet" th:href="@{/css/pages/dashboard.css}">
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main>
+<main id="main-content" tabindex="-1">
     <header class="welcome-header">
         <h1 th:if="${user != null}" th:text="${'Bonjour, ' + user.firstname}">Bonjour, Utilisateur</h1>
         <p>Gérez vos réservations et découvrez nos espaces disponibles.</p>
@@ -48,9 +47,9 @@
                             <p>Début : <span th:text="${#temporals.format(b.startTime, 'dd/MM/yyyy HH:mm')}"></span></p>
                             <p>Fin : <span th:text="${#temporals.format(b.endTime, 'dd/MM/yyyy HH:mm')}"></span></p>
                             <div class="action">
-                                <a th:href="@{/booking/{id}(id=${b.room.id})}" class="btn-detail">Voir salle</a>
+                                <a th:href="@{/booking/{id}(id=${b.room.id})}" class="btn btn-primary">Voir salle</a>
                                 <form th:action="@{/booking/cancel/{id}(id=${b.id})}" method="post">
-                                    <button type="submit" class="btn-cancel" data-confirm="Voulez-vous vraiment annuler cette réservation ?">Annuler</button>
+                                    <button type="submit" class="btn btn-danger-outline" data-confirm="Voulez-vous vraiment annuler cette réservation ?">Annuler</button>
                                 </form>
                             </div>
                         </div>

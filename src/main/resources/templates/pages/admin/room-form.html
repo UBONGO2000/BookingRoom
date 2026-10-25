@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier Salle - BookingRoom</title>
-    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <th:block th:insert="~{fragments/head :: head('Modifier Salle - BookingRoom')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/booking.css}">
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main>
+<main id="main-content" tabindex="-1">
     <div class="form-container">
         <h2 th:text="${room.id == null ? 'Ajouter une salle' : 'Modifier la salle'}">Editer Salle</h2>
         <p class="form-subtitle" th:text="${room.id == null ? 'Renseignez les informations de la nouvelle salle.' : 'Mettez à jour les informations de cette salle.'}">Sous-titre</p>

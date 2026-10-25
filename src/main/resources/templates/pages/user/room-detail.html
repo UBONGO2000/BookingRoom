@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails de la salle - BookingRoom</title>
-    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <th:block th:insert="~{fragments/head :: head('Détails de la salle - BookingRoom')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/booking.css}">
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main>
+<main id="main-content" tabindex="-1">
     <div class="detail-container">
         <div class="room-info">
-            <span th:if="${room.available}" class="status-badge status-badge--available">Disponible</span>
-            <span th:unless="${room.available}" class="status-badge status-badge--maintenance">Maintenance</span>
+            <span th:if="${room.available}" class="status-badge status-available">Disponible</span>
+            <span th:unless="${room.available}" class="status-badge status-unavailable">Maintenance</span>
             
             <h1 th:text="${room.name}">Nom de la salle</h1>
             <p><strong>Localisation :</strong> <span th:text="${room.location}">Localisation</span></p>

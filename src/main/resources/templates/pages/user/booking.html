@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Réserver une Salle - BookingRoom</title>
-    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <th:block th:insert="~{fragments/head :: head('Réserver une Salle - BookingRoom')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/card.css}">
     <link rel="stylesheet" th:href="@{/css/pages/booking.css}">
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main>
+<main id="main-content" tabindex="-1">
     <section class="search-container">
         <h2>Trouver une salle</h2>
         <form class="search-form" th:action="@{/booking}" method="get" th:object="${roomsearch}">
@@ -28,19 +27,19 @@
             </div>
 
             <div class="form-group">
-                <label class="radio-group">
+                <label class="checkbox-item">
                     <input type="checkbox" name="projector" id="projector" value="true" th:checked="*{projector}">
                     <span>Avec projecteur</span>
                 </label>
 
 
-                <label class="radio-group">
+                <label class="checkbox-item">
                     <input type="checkbox" name="whiteboard" id="whiteboard" value="true" th:checked="*{whiteboard}">
                     <span>Avec tableau blanc</span>
                 </label>
 
 
-                <label class="radio-group">
+                <label class="checkbox-item">
                     <input type="checkbox" name="videoconferencing" id="videoconferencing" value="true" th:checked="*{videoconferencing}">
                     <span>Avec video conference</span>
                 </label>
@@ -62,7 +61,7 @@
             </div>
 
             <!-- Pagination : les filtres courants sont repris dans chaque lien (URL partageable). -->
-            <div class="pagination" th:if="${totalPages > 1}">
+            <nav class="pagination" th:if="${totalPages > 1}" aria-label="Pagination">
                 <a th:if="${currentPage > 0}"
                    th:href="@{/booking(page=${currentPage - 1},
                                        name=${roomsearch.name},
@@ -80,7 +79,8 @@
                                            whiteboard=${roomsearch.whiteboard},
                                            videoconferencing=${roomsearch.videoconferencing})}"
                        th:text="${i + 1}"
-                       th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"></a>
+                       th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"
+                       th:attr="aria-current=${currentPage == i ? 'page' : null}"></a>
                 </span>
 
                 <a th:if="${currentPage < totalPages - 1}"
@@ -91,7 +91,7 @@
                                        whiteboard=${roomsearch.whiteboard},
                                        videoconferencing=${roomsearch.videoconferencing})}"
                    class="btn-page">Suivant</a>
-            </div>
+            </nav>
         </th:block>
 
         <th:block th:if="${#lists.isEmpty(rooms)}">

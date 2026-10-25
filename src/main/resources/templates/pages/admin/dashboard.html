@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - BookingRoom</title>
-    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <th:block th:insert="~{fragments/head :: head('Admin Dashboard - BookingRoom')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/fragments/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/pages/dashboard.css}">
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main class="admin-section">
+<main class="admin-section" id="main-content" tabindex="-1">
     <header class="admin-header">
         <h1>Administration</h1>
         <p>Gérez les salles et supervisez les réservations de l'organisation.</p>
@@ -133,19 +132,20 @@
             </tbody>
         </table>
 
-        <div th:if="${totalPages > 1}" class="pagination">
+        <nav th:if="${totalPages > 1}" class="pagination" aria-label="Pagination">
             <a th:if="${currentPage > 0}"
                th:href="@{/admin(page=${currentPage - 1}, size=${pageSize}, roomName=${roomName}, username=${username})}"
                class="btn-page">Précédent</a>
             <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                 <a th:href="@{/admin(page=${i}, size=${pageSize}, roomName=${roomName}, username=${username})}"
                    th:text="${i + 1}"
-                   th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"></a>
+                   th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"
+                   th:attr="aria-current=${currentPage == i ? 'page' : null}"></a>
             </span>
             <a th:if="${currentPage < totalPages - 1}"
                th:href="@{/admin(page=${currentPage + 1}, size=${pageSize}, roomName=${roomName}, username=${username})}"
                class="btn-page">Suivant</a>
-        </div>
+        </nav>
     </section>
 </main>
 
