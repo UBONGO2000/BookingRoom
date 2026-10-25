@@ -16,32 +16,32 @@
 <main>
     <section class="search-container">
         <h2>Trouver une salle</h2>
-        <form class="search-form" th:action="@{/booking}" method="post" th:object="${roomsearch}">
+        <form class="search-form" th:action="@{/booking}" method="get" th:object="${roomsearch}">
             <div class="form-group">
                 <label for="room">Nom de la salle</label>
-                <input type="text" id="room" name="room" placeholder="ex: Jupiter" th:field="*{name}">
+                <input type="text" id="room" placeholder="ex: Jupiter" th:field="*{name}">
             </div>
 
             <div class="form-group">
                 <label for="capacity">Capacité minimum</label>
-                <input id="capacity" type="number" name="capacity" min="1" placeholder="Nombre de personnes" th:field="*{capacity}">
+                <input id="capacity" type="number" min="1" placeholder="Nombre de personnes" th:field="*{capacity}">
             </div>
 
             <div class="form-group">
                 <label class="radio-group">
-                    <input type="checkbox" name="projector" id="projector" th:field="*{projector}">
+                    <input type="checkbox" name="projector" id="projector" value="true" th:checked="*{projector}">
                     <span>Avec projecteur</span>
                 </label>
 
 
                 <label class="radio-group">
-                    <input type="checkbox" name="whiteboard" id="whiteboard" th:field="*{whiteboard}">
+                    <input type="checkbox" name="whiteboard" id="whiteboard" value="true" th:checked="*{whiteboard}">
                     <span>Avec tableau blanc</span>
                 </label>
 
 
                 <label class="radio-group">
-                    <input type="checkbox" name="videoconferencing" id="videoconferencing" th:field="*{videoconferencing}">
+                    <input type="checkbox" name="videoconferencing" id="videoconferencing" value="true" th:checked="*{videoconferencing}">
                     <span>Avec video conference</span>
                 </label>
             </div>
@@ -53,7 +53,7 @@
 
     <!-- Section des résultats -->
     <section class="results-section">
-        <th:block th:if="${rooms != null}">
+        <th:block th:if="${!#lists.isEmpty(rooms)}">
             <h3>Salles disponibles</h3>
             <div class="cards-grid">
                 <th:block th:each="r : ${rooms}">
@@ -61,25 +61,40 @@
                 </th:block>
             </div>
 
-            <!-- Pagination -->
+            <!-- Pagination : les filtres courants sont repris dans chaque lien (URL partageable). -->
             <div class="pagination" th:if="${totalPages > 1}">
-                <a th:if="${currentPage > 0}" 
-                   th:href="@{/booking(page=${currentPage - 1})}" 
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/booking(page=${currentPage - 1},
+                                       name=${roomsearch.name},
+                                       capacity=${roomsearch.capacity},
+                                       projector=${roomsearch.projector},
+                                       whiteboard=${roomsearch.whiteboard},
+                                       videoconferencing=${roomsearch.videoconferencing})}"
                    class="btn-page">Précédent</a>
-                
+
                 <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/booking(page=${i})}" 
-                       th:text="${i + 1}" 
+                    <a th:href="@{/booking(page=${i},
+                                           name=${roomsearch.name},
+                                           capacity=${roomsearch.capacity},
+                                           projector=${roomsearch.projector},
+                                           whiteboard=${roomsearch.whiteboard},
+                                           videoconferencing=${roomsearch.videoconferencing})}"
+                       th:text="${i + 1}"
                        th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"></a>
                 </span>
 
-                <a th:if="${currentPage < totalPages - 1}" 
-                   th:href="@{/booking(page=${currentPage + 1})}" 
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/booking(page=${currentPage + 1},
+                                       name=${roomsearch.name},
+                                       capacity=${roomsearch.capacity},
+                                       projector=${roomsearch.projector},
+                                       whiteboard=${roomsearch.whiteboard},
+                                       videoconferencing=${roomsearch.videoconferencing})}"
                    class="btn-page">Suivant</a>
             </div>
         </th:block>
 
-        <th:block th:if="${rooms == null}">
+        <th:block th:if="${#lists.isEmpty(rooms)}">
             <div class="empty-state">
                 <div class="empty-state-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

@@ -41,34 +41,25 @@ public class BookingController {
 
 
     @GetMapping("/booking")
-    public String booking(Model model, Principal principal, @RequestParam(defaultValue = "0") int page){
+    public String booking(Model model, Principal principal,
+                          @ModelAttribute("roomsearch") RoomSearchDto criteria,
+                          @RequestParam(defaultValue = "0") int page) {
         if (principal != null) {
             userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
         }
-        Page<Room> roomPage = roomService.getAvailableRooms(PageRequest.of(page, 6));
+
+        int safePage = Math.max(page, 0);
+        Page<Room> roomPage = roomService.searchRooms(criteria, PageRequest.of(safePage, 6));
+
+        // Page hors limites (filtre modifie, ancienne URL...) : on revient sur la derniere page.
+        if (roomPage.getTotalPages() > 0 && safePage >= roomPage.getTotalPages()) {
+            safePage = roomPage.getTotalPages() - 1;
+            roomPage = roomService.searchRooms(criteria, PageRequest.of(safePage, 6));
+        }
+
         model.addAttribute("rooms", roomPage.getContent());
-        model.addAttribute("currentPage", page);
+        model.addAttribute("currentPage", roomPage.getNumber());
         model.addAttribute("totalPages", roomPage.getTotalPages());
-        model.addAttribute("roomsearch", new RoomSearchDto());
-        return "pages/user/booking";
-    }
-
-
-    @PostMapping("/booking")
-    public String searchRooms(Model model, 
-                              @ModelAttribute("roomsearch") RoomSearchDto roomSearchDto, 
-                              Principal principal,
-                              @RequestParam(defaultValue = "0") int page) {
-        if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
-        }
-
-        Page<Room> roomPage = roomService.searchRooms(roomSearchDto, PageRequest.of(page, 6));
-        
-        model.addAttribute("rooms", roomPage.getContent().isEmpty() ? null : roomPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", roomPage.getTotalPages());
-        
         return "pages/user/booking";
     }
 

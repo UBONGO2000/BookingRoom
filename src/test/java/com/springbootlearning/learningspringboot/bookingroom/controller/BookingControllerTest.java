@@ -16,14 +16,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -120,6 +124,50 @@ class BookingControllerTest {
     void bookingDetail_shouldReturn200_forExistingRoom() throws Exception {
         mockMvc.perform(get("/booking/" + existingRoom.getId()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "search_user", roles = "USER")
+    void bookingSearch_shouldBeGet_andKeepFiltersAtPagination() throws Exception {
+        for (int i = 1; i <= 8; i++) {
+            roomRepository.save(new Room(String.format("Recherche GET %02d", i), "desc", 20,
+                    "Batiment R", false, true, false));
+        }
+
+        MvcResult firstPage = mockMvc.perform(get("/booking")
+                        .param("name", "Recherche GET")
+                        .param("capacity", "10")
+                        .param("whiteboard", "true")
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("totalPages", 2))
+                .andExpect(model().attribute("currentPage", 0))
+                // Les liens de pagination reprennent les filtres courants.
+                .andExpect(content().string(containsString("name=Recherche")))
+                .andExpect(content().string(containsString("page=1")))
+                .andReturn();
+
+        @SuppressWarnings("unchecked")
+        List<Room> rooms = (List<Room>) firstPage.getModelAndView().getModel().get("rooms");
+        assertThat(rooms).hasSize(6)
+                .allMatch(r -> r.getName().startsWith("Recherche GET"));
+
+        mockMvc.perform(get("/booking")
+                        .param("name", "Recherche GET")
+                        .param("capacity", "10")
+                        .param("whiteboard", "true")
+                        .param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("currentPage", 1))
+                .andExpect(model().attribute("totalPages", 2));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void bookingSearch_shouldRejectPost() throws Exception {
+        // La recherche est desormais un GET partageable : l'ancien POST n'existe plus.
+        mockMvc.perform(post("/booking").with(csrf()))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test

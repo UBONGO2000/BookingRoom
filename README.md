@@ -171,15 +171,15 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-102 tests répartis sur 17 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+104 tests répartis sur 18 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 81,8 % | 82,0 % |
-| Couche service | 88,1 % | 97,2 % |
-| Couche contrôleur | 69,5 % | 74,7 % |
+| Ensemble du projet | 87,1 % | 85,9 % |
+| Couche service | 96,8 % | 96,8 % |
+| Couche contrôleur | 79,8 % | 82,7 % |
 
-La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité, annulation logique). Les contrôleurs le sont moins pour l'instant — j'ai ciblé volontairement les points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR), que deux créations simultanées sur le même créneau n'en laissent passer qu'une, et que l'inscription valide bien la confirmation du mot de passe. `HomeController` n'a pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
+La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité, annulation logique). Les contrôleurs le sont moins pour l'instant — j'ai ciblé volontairement les points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR), que deux créations simultanées sur le même créneau n'en laissent passer qu'une, et que l'inscription valide bien la confirmation du mot de passe. Les recherches paginées sont aussi testées : filtres conservés dans les liens, tri déterministe, et intégration avec plus de 100 salles pour vérifier que le filtrage reste en base. `HomeController` n'a pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
 
 ***
 
