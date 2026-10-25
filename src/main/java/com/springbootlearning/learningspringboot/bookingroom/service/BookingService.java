@@ -30,6 +30,10 @@ public class BookingService {
         return bookingRepository.findByUserUsername(username);
     }
 
+    public Page<Booking> getBookingsByUser(String username, Pageable pageable) {
+        return bookingRepository.findByUserUsername(username, pageable);
+    }
+
     // Dashboard : uniquement les reservations confirmees a venir.
     public List<Booking> getUpcomingBookingsByUser(String username) {
         return bookingRepository.findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(

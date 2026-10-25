@@ -196,15 +196,17 @@ Le CSRF est actif partout, y compris sur `/api/**` : seul `POST /api/auth/login`
 |---|---|---|---|
 | `/api/csrf` | GET | public | 200 `{"token":"..."}` ; pose aussi le cookie `XSRF-TOKEN` |
 | `/api/auth/login` | POST | public, exempté de CSRF | 200 `{"username":"..."}` ; 400 si champs manquants ; 401 si identifiants invalides ; 429 si compte verrouillé ou IP limitée (`Retry-After`) |
-| `/api/rooms` | GET | authentifié | 200, page JSON des salles disponibles ; filtres `name`, `capacity`, `projector`, `whiteboard`, `videoconferencing`, `page` (0) et `size` (10) ; 401 si anonyme |
+| `/api/rooms` | GET | authentifié | 200, page JSON des salles disponibles ; filtres `name`, `capacity`, `projector`, `whiteboard`, `videoconferencing`, `page` (0) et `size` (10, max 100) ; 400 si pagination invalide ; 401 si anonyme |
 | `/api/rooms/{id}` | GET | authentifié | 200 `{"room":{...},"evaluations":[]}` ; 404 si inconnue ; 401 si anonyme |
-| `/api/reservations/me` | GET | authentifié | 200, liste de mes réservations ; alias `/api/my-bookings` ; 401 si anonyme |
-| `/api/reservations` | POST | authentifié + CSRF | 200 `{"id":...,"message":"..."}` ; 400 pour une validation, une salle inconnue ou une règle métier ; 409 en cas de conflit de créneau ; 401 si anonyme ; 403 si CSRF invalide |
+| `/api/reservations/me` | GET | authentifié | 200, page JSON de mes réservations (`page`, `size` max 100) ; alias `/api/my-bookings` ; 400 si pagination invalide ; 401 si anonyme |
+| `/api/reservations/{id}` | GET | propriétaire ou ADMIN | 200, détail d'une réservation ; 403 si autre utilisateur ; 404 si inconnue ; 401 si anonyme |
+| `/api/reservations` | POST | authentifié + CSRF | 201 avec en-tête `Location` et `{"id":...,"message":"..."}` ; corps attendu : `title`, `startTime`, `endTime`, `roomId` (dates ISO) ; 400 pour une validation, une salle inconnue ou une règle métier ; 409 en cas de conflit de créneau ; 401 si anonyme ; 403 si CSRF invalide |
+| `/api/reservations/{id}` | DELETE | propriétaire ou ADMIN | 204, annulation logique ; 403 si autre utilisateur ; 404 si inconnue ; 401 si anonyme |
 | `/api/stats/overview` | GET | ADMIN | 200 ; 403 si USER ; 401 si anonyme |
 | `/api/rooms/available-now` | GET | authentifié | 200, salles disponibles dans l'heure qui vient ; 401 si anonyme |
 | `/api/me` | GET | authentifié | 200, profil courant ; 404 si l'utilisateur n'existe plus ; 401 si anonyme |
 
-Les erreurs applicatives sont renvoyées en JSON sous la forme `{"error":"..."}`. Un 401 produit par le filtre de sécurité peut avoir un corps vide ; les 400/403/409 applicatifs sont, eux, JSON. À ce stade, `POST /api/reservations` répond 200 avec l'identifiant créé ; le 201 avec en-tête `Location` n'est pas encore implémenté.
+Les erreurs applicatives sont renvoyées en JSON sous la forme `{"error":"..."}`. Un 401 produit par le filtre de sécurité peut avoir un corps vide ; les 400/403/409 applicatifs sont, eux, JSON.
 
 ***
 
@@ -238,13 +240,13 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw clean verify
 ```
 
-115 tests répartis sur 21 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+119 tests répartis sur 21 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 87,9 % | 87,5 % |
-| Couche service | 96,4 % | 97,9 % |
-| Couche contrôleur | 79,8 % | 82,7 % |
+| Ensemble du projet | 88,7 % | 88,3 % |
+| Couche service | 96,5 % | 97,9 % |
+| Couche contrôleur | 81,8 % | 85,2 % |
 
 Le build `verify` applique un seuil JaCoCo : 80 % d'instructions, 80 % de lignes et 65 % de branches. En dessous, la construction échoue.
 

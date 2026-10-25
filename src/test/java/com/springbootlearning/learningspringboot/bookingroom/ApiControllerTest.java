@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,9 +24,11 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,9 +117,17 @@ class ApiControllerTest {
     void myBookingsReturnsDtoWithRoomName() throws Exception {
         mockMvc.perform(get("/api/reservations/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].roomName").value("Salle API"))
-                .andExpect(jsonPath("$[0].room").doesNotExist())
-                .andExpect(jsonPath("$[0].user").doesNotExist());
+                .andExpect(jsonPath("$.content[0].roomName").value("Salle API"))
+                .andExpect(jsonPath("$.content[0].room").doesNotExist())
+                .andExpect(jsonPath("$.content[0].user").doesNotExist())
+                .andExpect(jsonPath("$.totalElements").isNumber());
+    }
+
+    @Test
+    void myBookingsRejectInvalidPagination() throws Exception {
+        mockMvc.perform(get("/api/reservations/me").param("size", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").exists());
     }
 
     @Test
@@ -193,6 +204,76 @@ class ApiControllerTest {
                         .content(payload))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("La salle est déjà réservée pour cette plage horaire."));
+    }
+
+    @Test
+    void bookingValidationReturns400() throws Exception {
+        mockMvc.perform(post("/api/reservations")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    void createBookingReturns201WithLocationAndCanBeReadAndCancelled() throws Exception {
+        Long bookingId = null;
+        try {
+            Room room = roomRepository.findByNameIgnoreCase("Salle API").orElseThrow();
+            LocalDateTime start = LocalDateTime.now().plusDays(3);
+            String payload = """
+                    {"title":"Nouvelle reunion","startTime":"%s","endTime":"%s","roomId":%d}
+                    """.formatted(start, start.plusHours(1), room.getId());
+
+            MvcResult created = mockMvc.perform(post("/api/reservations")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(payload))
+                    .andExpect(status().isCreated())
+                    .andExpect(header().exists("Location"))
+                    .andExpect(jsonPath("$.id").isNumber())
+                    .andExpect(jsonPath("$.message").value("Réservation créée avec succès"))
+                    .andReturn();
+
+            String location = created.getResponse().getHeader("Location");
+            bookingId = Long.valueOf(location.substring(location.lastIndexOf('/') + 1));
+
+            mockMvc.perform(get("/api/reservations/{id}", bookingId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(bookingId))
+                    .andExpect(jsonPath("$.status").value("CONFIRMED"));
+
+            mockMvc.perform(delete("/api/reservations/{id}", bookingId).with(csrf()))
+                    .andExpect(status().isNoContent());
+
+            mockMvc.perform(get("/api/reservations/{id}", bookingId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("CANCELLED"));
+        } finally {
+            if (bookingId != null) {
+                bookingRepository.deleteById(bookingId);
+            }
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "other", roles = "USER")
+    void bookingDetailAndCancellationShouldBeForbiddenForAnotherUser() throws Exception {
+        User owner = userRepository.findByUsername("apiuser").orElseThrow();
+        Room room = roomRepository.findByNameIgnoreCase("Salle API").orElseThrow();
+        LocalDateTime start = LocalDateTime.now().plusDays(4);
+        Booking booking = bookingRepository.save(new Booking(
+                "Reservation privee", start, start.plusHours(1), owner, room));
+
+        try {
+            mockMvc.perform(get("/api/reservations/{id}", booking.getId()))
+                    .andExpect(status().isForbidden());
+            mockMvc.perform(delete("/api/reservations/{id}", booking.getId()).with(csrf()))
+                    .andExpect(status().isForbidden());
+        } finally {
+            bookingRepository.delete(booking);
+        }
     }
 
     @Test

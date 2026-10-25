@@ -35,6 +35,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserUsername(String username);
 
     @EntityGraph(attributePaths = {"room", "user"})
+    Page<Booking> findByUserUsername(String username, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"room", "user"})
     List<Booking> findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(String username, LocalDateTime now, BookingStatus status);
 
     boolean existsByRoomIdAndEndTimeAfterAndStatus(Long roomId, LocalDateTime now, BookingStatus status);
