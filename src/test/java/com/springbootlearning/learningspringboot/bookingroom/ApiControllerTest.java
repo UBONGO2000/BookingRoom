@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -147,7 +148,35 @@ class ApiControllerTest {
         mockMvc.perform(get("/api/stats/overview"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalRooms").isNumber())
-                .andExpect(jsonPath("$.totalBookings").isNumber());
+                .andExpect(jsonPath("$.totalBookings").isNumber())
+                .andExpect(jsonPath("$.availableRooms").isNumber());
+    }
+
+    @Test
+    void availableNowShouldExcludeBusyAndUnavailableRooms() throws Exception {
+        User user = userRepository.findByUsername("apiuser").orElseThrow();
+        Room busy = roomRepository.save(new Room(
+                "Salle Occupee API", "desc", 10, "Batiment Test", true, true, true));
+        Room free = roomRepository.save(new Room(
+                "Salle Libre API", "desc", 10, "Batiment Test", true, true, true));
+        Room closed = new Room("Salle Fermee API", "desc", 10, "Batiment Test", true, true, true);
+        closed.setAvailable(false);
+        closed = roomRepository.save(closed);
+
+        LocalDateTime now = LocalDateTime.now();
+        Booking current = bookingRepository.save(new Booking(
+                "Reunion en cours", now.minusMinutes(10), now.plusMinutes(50), user, busy));
+
+        try {
+            mockMvc.perform(get("/api/rooms/available-now"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[?(@.name == 'Salle Libre API')]").isNotEmpty())
+                    .andExpect(jsonPath("$[?(@.name == 'Salle Occupee API')]").isEmpty())
+                    .andExpect(jsonPath("$[?(@.name == 'Salle Fermee API')]").isEmpty());
+        } finally {
+            bookingRepository.delete(current);
+            roomRepository.deleteAll(List.of(busy, free, closed));
+        }
     }
 
     @Test

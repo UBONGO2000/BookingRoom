@@ -7,6 +7,7 @@ import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
 import com.springbootlearning.learningspringboot.bookingroom.dto.UserResponse;
 import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
@@ -196,22 +197,19 @@ public class ApiController {
         stats.put("totalRooms", roomRepository.count());
         stats.put("totalBookings", bookingRepository.count());
         stats.put("totalUsers", userRepository.count());
-        
-        long availableRooms = roomRepository.findAll().stream()
-                .filter(Room::getAvailable)
-                .count();
-        stats.put("availableRooms", availableRooms);
-        
+        // Un COUNT en base : plus besoin de charger toutes les salles.
+        stats.put("availableRooms", roomRepository.countByAvailableTrue());
+
         return ResponseEntity.ok(stats);
     }
 
     @GetMapping("/rooms/available-now")
     public ResponseEntity<List<RoomResponse>> getRoomsAvailableNow() {
-        List<RoomResponse> availableRooms = roomRepository.findAll().stream()
-                .filter(Room::getAvailable)
-                .filter(room -> bookingService.isRoomAvailable(room.getId(), 
-                        java.time.LocalDateTime.now(), 
-                        java.time.LocalDateTime.now().plusHours(1)))
+        // Une seule requete NOT EXISTS : le nombre de requetes ne depend plus du nombre de salles.
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        List<RoomResponse> availableRooms = roomRepository
+                .findAvailableBetween(now, now.plusHours(1), BookingStatus.CONFIRMED)
+                .stream()
                 .map(RoomResponse::from)
                 .toList();
         return ResponseEntity.ok(availableRooms);
