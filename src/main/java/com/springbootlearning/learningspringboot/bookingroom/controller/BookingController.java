@@ -1,5 +1,6 @@
 package com.springbootlearning.learningspringboot.bookingroom.controller;
 
+import com.springbootlearning.learningspringboot.bookingroom.dto.BookingFormDto;
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
@@ -7,18 +8,20 @@ import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -71,7 +74,7 @@ public class BookingController {
 
 
     @GetMapping("/booking/{id}")
-    public String bookingDetail(@PathVariable Long id, Model model, Principal principal, @RequestParam(required = false) String error) {
+    public String bookingDetail(@PathVariable Long id, Model model, Principal principal) {
         Room room = roomService.getRoomById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette salle n'existe pas."));
 
@@ -80,33 +83,46 @@ public class BookingController {
         }
         model.addAttribute("room", room);
         model.addAttribute("bookings", bookingService.getBookingsByRoom(room));
-        if (error != null) {
-            model.addAttribute("errorMessage", error);
+        if (!model.containsAttribute("bookingForm")) {
+            model.addAttribute("bookingForm", new BookingFormDto(room.getId(), null, null, null));
         }
         return "pages/user/room-detail";
     }
 
     @PostMapping("/booking/confirm")
-    public String confirmBooking(@RequestParam Long roomId, 
-                                 @RequestParam String title,
-                                 @RequestParam String startTime,
-                                 @RequestParam String endTime,
-                                 Principal principal,
-                                 Model model) {
-        if (principal != null) {
-            try {
-                User user = userRepository.findByUsername(principal.getName()).orElseThrow();
-                Room room = roomService.getRoomById(roomId).orElseThrow();
-                
-                LocalDateTime start = LocalDateTime.parse(startTime);
-                LocalDateTime end = LocalDateTime.parse(endTime);
-                
-                bookingService.createBooking(title, start, end, user, room);
-            } catch (Exception e) {
-                // Encoder le message d'erreur pour l'URL
-                String encodedError = java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
-                return "redirect:/booking/" + roomId + "?error=" + encodedError;
+    public String confirmBooking(@Valid @ModelAttribute("bookingForm") BookingFormDto bookingForm,
+                                 BindingResult result,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes,
+                                 Principal principal) {
+        if (principal == null) {
+            throw new AccessDeniedException("Authentification requise pour réserver une salle.");
+        }
+
+        if (result.hasErrors()) {
+            if (bookingForm.roomId() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Veuillez sélectionner une salle.");
+                return "redirect:/booking";
             }
+            Room room = roomService.getRoomById(bookingForm.roomId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette salle n'existe pas."));
+            userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
+            model.addAttribute("room", room);
+            model.addAttribute("bookings", bookingService.getBookingsByRoom(room));
+            return "pages/user/room-detail";
+        }
+
+        Room room = roomService.getRoomById(bookingForm.roomId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette salle n'existe pas."));
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur inconnu."));
+
+        try {
+            bookingService.createBooking(bookingForm.title(), bookingForm.startTime(), bookingForm.endTime(), user, room);
+        } catch (RuntimeException e) {
+            // PRG : le message voyage en session, plus de ?error=... dans l'URL.
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/booking/" + room.getId();
         }
         return "redirect:/dashboard";
     }

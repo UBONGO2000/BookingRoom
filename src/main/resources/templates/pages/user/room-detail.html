@@ -56,22 +56,26 @@
 
         <div class="booking-form">
             <h2>Réserver cette salle</h2>
-            <div th:if="${errorMessage}" class="booking-error" th:text="${errorMessage}">
+            <div th:if="${errorMessage}" class="booking-error" role="alert" th:text="${errorMessage}">
                 Erreur lors de la réservation.
             </div>
-            <form th:action="@{/booking/confirm}" method="post">
-                <input type="hidden" name="roomId" th:value="${room.id}">
+            <form th:action="@{/booking/confirm}" method="post" th:object="${bookingForm}">
+                <input type="hidden" th:field="*{roomId}">
                 <div class="form-group">
                     <label for="title">Objet de la réunion</label>
-                    <input type="text" id="title" name="title" required placeholder="ex: Team Standup">
+                    <input type="text" id="title" th:field="*{title}" required minlength="3" maxlength="200" placeholder="ex: Team Standup">
+                    <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="input-error-message" role="alert"></span>
                 </div>
                 <div class="form-group">
                     <label for="startTime">Heure de début</label>
-                    <input type="datetime-local" id="startTime" name="startTime" required>
+                    <input type="datetime-local" id="startTime" th:field="*{startTime}" required>
+                    <span th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" class="input-error-message" role="alert"></span>
                 </div>
                 <div class="form-group">
                     <label for="endTime">Heure de fin</label>
-                    <input type="datetime-local" id="endTime" name="endTime" required>
+                    <input type="datetime-local" id="endTime" th:field="*{endTime}" required>
+                    <span th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" class="input-error-message" role="alert"></span>
+                    <span th:if="${#fields.hasErrors('endAfterStart')}" th:errors="*{endAfterStart}" class="input-error-message" role="alert"></span>
                 </div>
                 <button type="submit" class="btn-confirm" th:disabled="${!room.available}">Confirmer la réservation</button>
             </form>

@@ -4,9 +4,12 @@ import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
+import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -52,8 +55,47 @@ public class AdminController {
     }
 
     @PostMapping("/rooms/save")
-    public String saveRoom(@ModelAttribute Room room) {
-        roomService.saveRoom(room);
+    public String saveRoom(@Valid @ModelAttribute("room") Room room,
+                           BindingResult result,
+                           Model model,
+                           Principal principal) {
+        // Les checkboxes Thymeleaf envoient toujours une valeur (champ cache _xxx),
+        // mais un POST direct peut omettre ces champs : on evite un 500 SQL.
+        if (room.getProjector() == null) {
+            room.setProjector(false);
+        }
+        if (room.getWhiteboard() == null) {
+            room.setWhiteboard(false);
+        }
+        if (room.getVideoconferencing() == null) {
+            room.setVideoconferencing(false);
+        }
+        if (room.getAvailable() == null) {
+            room.setAvailable(true);
+        }
+
+        String name = room.getName() == null ? null : room.getName().trim();
+        room.setName(name);
+        if (name != null && !name.isBlank()) {
+            roomService.getRoomByName(name)
+                    .filter(existing -> !existing.getId().equals(room.getId()))
+                    .ifPresent(existing -> result.rejectValue(
+                            "name", "duplicate", "Une salle porte déjà ce nom."));
+        }
+
+        if (result.hasErrors()) {
+            addUserToModel(model, principal);
+            return "pages/admin/room-form";
+        }
+
+        try {
+            roomService.saveRoom(room);
+        } catch (DataIntegrityViolationException e) {
+            // Filet de securite si deux requetes concurrentes passent la verification ci-dessus.
+            result.rejectValue("name", "duplicate", "Une salle porte déjà ce nom.");
+            addUserToModel(model, principal);
+            return "pages/admin/room-form";
+        }
         return "redirect:/admin";
     }
 

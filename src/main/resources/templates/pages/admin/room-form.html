@@ -18,25 +18,35 @@
         <p class="form-subtitle" th:text="${room.id == null ? 'Renseignez les informations de la nouvelle salle.' : 'Mettez à jour les informations de cette salle.'}">Sous-titre</p>
         <form th:action="@{/admin/rooms/save}" th:object="${room}" method="post">
             <input type="hidden" th:field="*{id}">
-            
+
+            <div th:if="${#fields.hasAnyErrors()}" class="booking-error" role="alert">
+                <ul>
+                    <li th:each="err : ${#fields.allErrors()}" th:text="${err}"></li>
+                </ul>
+            </div>
+
             <div class="form-group">
                 <label for="name">Nom de la salle</label>
-                <input type="text" id="name" th:field="*{name}" required>
+                <input type="text" id="name" th:field="*{name}" required minlength="2" maxlength="100">
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="input-error-message" role="alert"></span>
             </div>
 
             <div class="form-group">
                 <label for="location">Localisation</label>
-                <input type="text" id="location" th:field="*{location}" required>
+                <input type="text" id="location" th:field="*{location}" required maxlength="200">
+                <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="input-error-message" role="alert"></span>
             </div>
 
             <div class="form-group">
                 <label for="capacity">Capacité</label>
                 <input type="number" id="capacity" th:field="*{capacity}" required min="1">
+                <span th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}" class="input-error-message" role="alert"></span>
             </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" th:field="*{description}" rows="3"></textarea>
+                <textarea id="description" th:field="*{description}" rows="3" maxlength="1000"></textarea>
+                <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="input-error-message" role="alert"></span>
             </div>
 
             <div class="checkbox-group">

@@ -23,7 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -86,6 +90,7 @@ class BookingControllerTest {
         mockMvc.perform(post("/booking/cancel/" + booking.getId()).with(csrf()))
                 .andExpect(status().is3xxRedirection());
 
+        // Annulation : la ligne est supprimee.
         assertThat(bookingRepository.findById(booking.getId())).isEmpty();
     }
 
@@ -135,5 +140,76 @@ class BookingControllerTest {
 
         assertThat(bookingRepository.findByRoom(existingRoom))
                 .anyMatch(b -> b.getUser().getUsername().equals("carol") && b.getTitle().equals("Point d'equipe"));
+    }
+
+    @Test
+    @WithMockUser(username = "dave_validation", roles = "USER")
+    void confirmBooking_shouldRejectShortTitle_withoutCreatingBooking() throws Exception {
+        userService.register("Dave", "Validation", "dave_validation", "dave_validation@test.com", "Password@123");
+        LocalDateTime start = LocalDateTime.now().plusDays(3);
+
+        mockMvc.perform(post("/booking/confirm")
+                        .with(csrf())
+                        .param("roomId", existingRoom.getId().toString())
+                        .param("title", "AB")
+                        .param("startTime", start.toString())
+                        .param("endTime", start.plusHours(1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("pages/user/room-detail"))
+                .andExpect(model().attributeHasFieldErrors("bookingForm", "title"));
+    }
+
+    @Test
+    @WithMockUser(username = "erin_validation", roles = "USER")
+    void confirmBooking_shouldRejectEndBeforeStart() throws Exception {
+        userService.register("Erin", "Validation", "erin_validation", "erin_validation@test.com", "Password@123");
+        LocalDateTime start = LocalDateTime.now().plusDays(3);
+
+        mockMvc.perform(post("/booking/confirm")
+                        .with(csrf())
+                        .param("roomId", existingRoom.getId().toString())
+                        .param("title", "Creneau invalide")
+                        .param("startTime", start.toString())
+                        .param("endTime", start.minusHours(1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("pages/user/room-detail"))
+                .andExpect(model().attributeHasFieldErrors("bookingForm", "endAfterStart"));
+    }
+
+    @Test
+    @WithMockUser(username = "frank_validation", roles = "USER")
+    void confirmBooking_shouldRejectPastDates_beforeReachingTheDatabase() throws Exception {
+        userService.register("Frank", "Validation", "frank_validation", "frank_validation@test.com", "Password@123");
+        LocalDateTime start = LocalDateTime.now().minusDays(1);
+
+        mockMvc.perform(post("/booking/confirm")
+                        .with(csrf())
+                        .param("roomId", existingRoom.getId().toString())
+                        .param("title", "Dans le passe")
+                        .param("startTime", start.toString())
+                        .param("endTime", start.plusHours(1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("pages/user/room-detail"))
+                .andExpect(model().attributeHasFieldErrors("bookingForm", "startTime", "endTime"));
+    }
+
+    @Test
+    @WithMockUser(username = "grace_validation", roles = "USER")
+    void confirmBooking_shouldRedirectWithFlashError_whenSlotIsTaken() throws Exception {
+        User owner = userService.register("Grace", "Owner", "grace_owner", "grace_owner@test.com", "Password@123");
+        userService.register("Grace", "Validation", "grace_validation", "grace_validation@test.com", "Password@123");
+        LocalDateTime start = LocalDateTime.now().plusDays(4).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime end = start.plusHours(1);
+        bookingService.createBooking("Deja pris", start, end, owner, existingRoom);
+
+        mockMvc.perform(post("/booking/confirm")
+                        .with(csrf())
+                        .param("roomId", existingRoom.getId().toString())
+                        .param("title", "Conflit de creneau")
+                        .param("startTime", start.toString())
+                        .param("endTime", end.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/booking/" + existingRoom.getId()))
+                .andExpect(flash().attribute("errorMessage", "La salle est déjà réservée pour cette plage horaire."));
     }
 }
