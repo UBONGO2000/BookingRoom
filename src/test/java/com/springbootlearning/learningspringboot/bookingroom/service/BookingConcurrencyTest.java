@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
 
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
@@ -90,7 +91,8 @@ class BookingConcurrencyTest {
             assertThat(failures).containsExactly("La salle est déjà réservée pour cette plage horaire.");
 
             // Une seule ligne en base pour ce creneau.
-            assertThat(bookingRepository.findOverlappingBookings(room.getId(), start, end))
+            assertThat(bookingRepository.findOverlappingBookings(
+                    room.getId(), start, end, BookingStatus.CONFIRMED))
                     .extracting(Booking::getId)
                     .containsExactly(successes.get(0).getId());
         } finally {

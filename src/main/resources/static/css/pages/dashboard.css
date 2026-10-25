@@ -142,3 +142,13 @@ main {
     background: var(--bg-card);
     color: var(--text-main);
 }
+
+.error-banner {
+    margin: 0 0 1.5rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--danger);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--text-main);
+    font-weight: 500;
+}

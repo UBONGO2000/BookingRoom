@@ -2,13 +2,16 @@ package com.springbootlearning.learningspringboot.bookingroom.service;
 
 
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
+import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,9 +19,11 @@ import java.util.Optional;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
 
-    public RoomService(RoomRepository roomRepository){
+    public RoomService(RoomRepository roomRepository, BookingRepository bookingRepository){
         this.roomRepository = roomRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<Room> getAllRooms(){
@@ -88,6 +93,12 @@ public class RoomService {
     }
 
     public void deleteRoom(Long id) {
+        boolean hasFutureBookings = bookingRepository.existsByRoomIdAndEndTimeAfterAndStatus(
+                id, LocalDateTime.now(), BookingStatus.CONFIRMED);
+        if (hasFutureBookings) {
+            throw new IllegalStateException(
+                    "Impossible de supprimer cette salle : des réservations à venir existent.");
+        }
         roomRepository.deleteById(id);
     }
 }

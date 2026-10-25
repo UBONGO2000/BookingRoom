@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.dto;
 
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +11,9 @@ public record BookingResponse(
         LocalDateTime startTime,
         LocalDateTime endTime,
         String roomName,
-        Long roomId
+        Long roomId,
+        BookingStatus status,
+        LocalDateTime cancelledAt
 ) {
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(
@@ -19,7 +22,9 @@ public record BookingResponse(
                 booking.getStartTime(),
                 booking.getEndTime(),
                 booking.getRoom().getName(),
-                booking.getRoom().getId()
+                booking.getRoom().getId(),
+                booking.getStatus(),
+                booking.getCancelledAt()
         );
     }
 }

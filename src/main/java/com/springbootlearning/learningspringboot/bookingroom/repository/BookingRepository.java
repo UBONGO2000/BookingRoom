@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.repository;
 
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,17 +27,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByRoom(Room room);
 
     @EntityGraph(attributePaths = {"room", "user"})
-    List<Booking> findByRoomAndEndTimeAfterOrderByStartTimeAsc(Room room, LocalDateTime now);
+    List<Booking> findByRoomAndEndTimeAfterAndStatusOrderByStartTimeAsc(Room room, LocalDateTime now, BookingStatus status);
 
     @EntityGraph(attributePaths = {"room", "user"})
     List<Booking> findByUserUsername(String username);
 
     @EntityGraph(attributePaths = {"room", "user"})
-    List<Booking> findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(String username, LocalDateTime now);
+    List<Booking> findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(String username, LocalDateTime now, BookingStatus status);
 
-    @Query("SELECT b FROM Booking b WHERE b.room.id = :roomId " +
+    boolean existsByRoomIdAndEndTimeAfterAndStatus(Long roomId, LocalDateTime now, BookingStatus status);
+
+    @Query("SELECT b FROM Booking b WHERE b.room.id = :roomId AND b.status = :status " +
            "AND ((b.startTime < :endTime AND b.endTime > :startTime))")
-    List<Booking> findOverlappingBookings(@Param("roomId") Long roomId, 
-                                          @Param("startTime") LocalDateTime startTime, 
-                                          @Param("endTime") LocalDateTime endTime);
+    List<Booking> findOverlappingBookings(@Param("roomId") Long roomId,
+                                          @Param("startTime") LocalDateTime startTime,
+                                          @Param("endTime") LocalDateTime endTime,
+                                          @Param("status") BookingStatus status);
 }

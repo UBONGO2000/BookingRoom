@@ -1,9 +1,10 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
 
-import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
+import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import org.springframework.stereotype.Service;
@@ -31,14 +32,15 @@ public class BookingService {
         return bookingRepository.findByUserUsername(username);
     }
 
-    // Dashboard : uniquement les reservations a venir (les anciennes restent en base
-    // pour l'historique admin, mais n'encombrent plus la page utilisateur).
+    // Dashboard : uniquement les reservations confirmees a venir.
     public List<Booking> getUpcomingBookingsByUser(String username) {
-        return bookingRepository.findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(username, LocalDateTime.now());
+        return bookingRepository.findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(
+                username, LocalDateTime.now(), BookingStatus.CONFIRMED);
     }
 
     public List<Booking> getBookingsByRoom(Room room) {
-        return bookingRepository.findByRoomAndEndTimeAfterOrderByStartTimeAsc(room, LocalDateTime.now());
+        return bookingRepository.findByRoomAndEndTimeAfterAndStatusOrderByStartTimeAsc(
+                room, LocalDateTime.now(), BookingStatus.CONFIRMED);
     }
 
     public List<Booking> searchBookings(String roomName, String username) {
@@ -52,7 +54,9 @@ public class BookingService {
         if (startTime.isAfter(endTime) || startTime.isEqual(endTime)) {
             return false;
         }
-        List<Booking> overlapping = bookingRepository.findOverlappingBookings(roomId, startTime, endTime);
+        // Une reservation annulee ne bloque plus le creneau.
+        List<Booking> overlapping = bookingRepository.findOverlappingBookings(
+                roomId, startTime, endTime, BookingStatus.CONFIRMED);
         return overlapping.isEmpty();
     }
 
@@ -86,8 +90,17 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    // Annulation logique : la ligne reste en base pour l'historique.
+    @Transactional
     public void cancelBooking(Long id) {
-        bookingRepository.deleteById(id);
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cette réservation n'existe pas."));
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            return;
+        }
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setCancelledAt(LocalDateTime.now());
+        bookingRepository.save(booking);
     }
 
     public java.util.Optional<Booking> getBookingById(Long id) {

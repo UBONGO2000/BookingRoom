@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.controller;
 
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
@@ -78,7 +79,9 @@ class BookingControllerTest {
         mockMvc.perform(post("/booking/cancel/" + booking.getId()).with(csrf()))
                 .andExpect(status().isForbidden());
 
-        assertThat(bookingRepository.findById(booking.getId())).isPresent();
+        Booking unchanged = bookingRepository.findById(booking.getId()).orElseThrow();
+        assertThat(unchanged.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
+        assertThat(unchanged.getCancelledAt()).isNull();
     }
 
     @Test
@@ -90,8 +93,10 @@ class BookingControllerTest {
         mockMvc.perform(post("/booking/cancel/" + booking.getId()).with(csrf()))
                 .andExpect(status().is3xxRedirection());
 
-        // Annulation : la ligne est supprimee.
-        assertThat(bookingRepository.findById(booking.getId())).isEmpty();
+        // Annulation logique : la ligne reste en base pour l'historique.
+        Booking cancelled = bookingRepository.findById(booking.getId()).orElseThrow();
+        assertThat(cancelled.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(cancelled.getCancelledAt()).isNotNull();
     }
 
     @Test
@@ -105,7 +110,9 @@ class BookingControllerTest {
         mockMvc.perform(post("/booking/cancel/" + booking.getId()).with(csrf()))
                 .andExpect(status().is3xxRedirection());
 
-        assertThat(bookingRepository.findById(booking.getId())).isEmpty();
+        Booking cancelled = bookingRepository.findById(booking.getId()).orElseThrow();
+        assertThat(cancelled.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(cancelled.getCancelledAt()).isNotNull();
     }
 
     @Test

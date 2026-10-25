@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
 
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
@@ -98,7 +99,8 @@ class BookingServiceTest {
     @Test
     void getUpcomingBookingsByUser_shouldCallRepositoryWithCurrentTime() {
         // Given
-        when(bookingRepository.findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(eq("alice"), any(LocalDateTime.class)))
+        when(bookingRepository.findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(
+                eq("alice"), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED)))
                 .thenReturn(Collections.singletonList(booking));
 
         // When
@@ -107,7 +109,8 @@ class BookingServiceTest {
         // Then
         assertThat(result).containsExactly(booking);
         verify(bookingRepository)
-                .findByUserUsernameAndEndTimeAfterOrderByStartTimeAsc(eq("alice"), any(LocalDateTime.class));
+                .findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(
+                        eq("alice"), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED));
     }
 
     // ==========================================
@@ -116,7 +119,8 @@ class BookingServiceTest {
     @Test
     void getBookingsByRoom_shouldCallRepositoryWithCurrentTime() {
         // Given
-        when(bookingRepository.findByRoomAndEndTimeAfterOrderByStartTimeAsc(any(Room.class), any(LocalDateTime.class)))
+        when(bookingRepository.findByRoomAndEndTimeAfterAndStatusOrderByStartTimeAsc(
+                any(Room.class), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED)))
                 .thenReturn(Collections.singletonList(booking));
 
         // When
@@ -124,7 +128,8 @@ class BookingServiceTest {
 
         // Then
         assertThat(result).hasSize(1);
-        verify(bookingRepository).findByRoomAndEndTimeAfterOrderByStartTimeAsc(eq(room), any(LocalDateTime.class));
+        verify(bookingRepository).findByRoomAndEndTimeAfterAndStatusOrderByStartTimeAsc(
+                eq(room), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED));
     }
 
     // ==========================================
@@ -187,13 +192,14 @@ class BookingServiceTest {
         // Then
         assertThat(available).isFalse();
         // On vérifie que la base de données n'a même pas été interrogée (court-circuit)
-        verify(bookingRepository, never()).findOverlappingBookings(anyLong(), any(), any());
+        verify(bookingRepository, never()).findOverlappingBookings(anyLong(), any(), any(), any());
     }
 
     @Test
     void isRoomAvailable_shouldReturnTrue_ifNoOverlap() {
         // Given
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.emptyList());
 
         // When
         boolean available = bookingService.isRoomAvailable(1L, futureStartTime, futureEndTime);
@@ -206,7 +212,8 @@ class BookingServiceTest {
     void isRoomAvailable_shouldReturnFalse_ifOverlapExists() {
         // Given
         Booking overlappingBooking = new Booking();
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.singletonList(overlappingBooking));
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.singletonList(overlappingBooking));
 
         // When
         boolean available = bookingService.isRoomAvailable(1L, futureStartTime, futureEndTime);
@@ -236,7 +243,8 @@ class BookingServiceTest {
         // Given
         when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
         // On simule que la méthode findOverlappingBookings renvoie une réservation (conflit)
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.singletonList(new Booking()));
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.singletonList(new Booking()));
 
         // When & Then
         assertThatThrownBy(() -> bookingService.createBooking("Titre", futureStartTime, futureEndTime, user, room))
@@ -249,7 +257,8 @@ class BookingServiceTest {
         // Given
         room.setAvailable(false);
         when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.emptyList());
 
         // When & Then
         assertThatThrownBy(() -> bookingService.createBooking("Titre", futureStartTime, futureEndTime, user, room))
@@ -262,7 +271,8 @@ class BookingServiceTest {
         // Given
         room.setAvailableFrom(futureStartTime.plusHours(2)); // La salle ouvre plus tard que la demande
         when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.emptyList());
 
         // When & Then
         assertThatThrownBy(() -> bookingService.createBooking("Titre", futureStartTime, futureEndTime, user, room))
@@ -275,7 +285,8 @@ class BookingServiceTest {
         // Given
         room.setAvailableUntil(futureStartTime.minusHours(1)); // La salle ferme avant le début
         when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.emptyList());
 
         // When & Then
         assertThatThrownBy(() -> bookingService.createBooking("Titre", futureStartTime, futureEndTime, user, room))
@@ -287,7 +298,8 @@ class BookingServiceTest {
     void createBooking_shouldSuccess_andSaveBooking() {
         // Given
         when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
-        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(), any(), eq(BookingStatus.CONFIRMED)))
+                .thenReturn(Collections.emptyList());
 
         // On simule le retour du save (généralement la BD renvoie l'objet avec l'ID généré)
         Booking savedBooking = new Booking("Titre", futureStartTime, futureEndTime, user, room);
@@ -313,15 +325,44 @@ class BookingServiceTest {
     }
 
     // ==========================================
-    // TEST : cancelBooking
+    // TEST : cancelBooking (annulation logique)
     // ==========================================
     @Test
-    void cancelBooking_shouldCallRepositoryDelete() {
+    void cancelBooking_shouldMarkBookingAsCancelled() {
+        // Given
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+
         // When
         bookingService.cancelBooking(1L);
 
         // Then
-        verify(bookingRepository).deleteById(1L);
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(booking.getCancelledAt()).isNotNull();
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void cancelBooking_shouldBeIdempotent_whenAlreadyCancelled() {
+        // Given
+        booking.setStatus(BookingStatus.CANCELLED);
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+
+        // When
+        bookingService.cancelBooking(1L);
+
+        // Then
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
+    void cancelBooking_shouldThrowException_whenBookingDoesNotExist() {
+        // Given
+        when(bookingRepository.findById(404L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> bookingService.cancelBooking(404L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Cette réservation n'existe pas.");
     }
 
     // ==========================================

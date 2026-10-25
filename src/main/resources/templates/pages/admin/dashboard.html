@@ -18,6 +18,10 @@
         <p>Gérez les salles et supervisez les réservations de l'organisation.</p>
     </header>
 
+    <div th:if="${errorMessage}" class="error-banner" role="alert" th:text="${errorMessage}">
+        Une erreur est survenue.
+    </div>
+
     <section>
         <div class="section-header">
             <h2>Gestion des Salles</h2>
@@ -104,6 +108,7 @@
                     <th>Titre</th>
                     <th>Début</th>
                     <th>Fin</th>
+                    <th>Statut</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -115,9 +120,14 @@
                     <td th:text="${#temporals.format(booking.startTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</td>
                     <td th:text="${#temporals.format(booking.endTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 14:00</td>
                     <td>
-                        <form th:action="@{/booking/cancel/{id}(id=${booking.id})}" method="post">
+                        <span th:if="${booking.status.name() == 'CANCELLED'}" class="status-badge status-unavailable">Annulée</span>
+                        <span th:unless="${booking.status.name() == 'CANCELLED'}" class="status-badge status-available">Confirmée</span>
+                    </td>
+                    <td>
+                        <form th:if="${booking.status.name() != 'CANCELLED'}" th:action="@{/booking/cancel/{id}(id=${booking.id})}" method="post">
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Annuler cette réservation ?')">Annuler</button>
                         </form>
+                        <span th:if="${booking.status.name() == 'CANCELLED'}">—</span>
                     </td>
                 </tr>
             </tbody>

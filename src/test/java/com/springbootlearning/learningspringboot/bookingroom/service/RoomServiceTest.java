@@ -1,7 +1,9 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
 
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
+import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
+import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,11 +12,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.ArgumentCaptor;
@@ -31,6 +36,9 @@ class RoomServiceTest {
 
     @Mock
     private RoomRepository roomRepository;
+
+    @Mock
+    private BookingRepository bookingRepository;
 
     @InjectMocks
     private RoomService roomService;
@@ -236,10 +244,27 @@ class RoomServiceTest {
 
     @Test
     void deleteRoom_shouldDeleteRoom() {
+        // Given : aucune réservation à venir
+        when(bookingRepository.existsByRoomIdAndEndTimeAfterAndStatus(
+                eq(5L), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED))).thenReturn(false);
+
         // When (Méthode void, pas de retour à vérifier)
         roomService.deleteRoom(5L);
 
         // Then : On vérifie que la méthode delete du repository a bien été appelée
         verify(roomRepository).deleteById(5L);
+    }
+
+    @Test
+    void deleteRoom_shouldRefuse_whenFutureBookingsExist() {
+        // Given
+        when(bookingRepository.existsByRoomIdAndEndTimeAfterAndStatus(
+                eq(5L), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED))).thenReturn(true);
+
+        // When & Then
+        assertThatThrownBy(() -> roomService.deleteRoom(5L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("réservations à venir");
+        verify(roomRepository, never()).deleteById(anyLong());
     }
 }

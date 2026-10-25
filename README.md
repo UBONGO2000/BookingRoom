@@ -10,7 +10,7 @@ Stack : Java 17, Spring Boot, Spring Security, Thymeleaf, PostgreSQL, Docker, te
 
 - Connexion / inscription, avec deux rôles : utilisateur et administrateur.
 - Gestion des salles côté admin : création, modification, suppression, équipements (projecteur, tableau blanc, visioconférence).
-- Réservation côté utilisateur : recherche par capacité/équipement, réservation d'un créneau, annulation.
+- Réservation côté utilisateur : recherche par capacité/équipement, réservation d'un créneau, annulation (logique : la réservation reste dans l'historique).
 - L'admin voit et peut annuler n'importe quelle réservation, avec un filtre par salle ou par utilisateur.
 - Rendu entièrement côté serveur avec Thymeleaf — pas de framework JS, tout est généré par le backend.
 - Politique de mot de passe assez stricte à l'inscription (majuscule, minuscule, chiffre, caractère spécial).
@@ -171,15 +171,15 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-79 tests répartis sur 13 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+94 tests répartis sur 15 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 76,7 % | 74,4 % |
-| Couche service | 87,7 % | 96,8 % |
-| Couche contrôleur | 57,6 % | 60,7 % |
+| Ensemble du projet | 79,2 % | 77,6 % |
+| Couche service | 88,1 % | 97,2 % |
+| Couche contrôleur | 65,6 % | 68,9 % |
 
-La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité). Les contrôleurs le sont beaucoup moins pour l'instant — j'ai ciblé volontairement les deux points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, et qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR). `AuthController` et `HomeController` n'ont pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
+La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité, annulation logique). Les contrôleurs le sont moins pour l'instant — j'ai ciblé volontairement les points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR), et que deux créations simultanées sur le même créneau n'en laissent passer qu'une. `AuthController` et `HomeController` n'ont pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
 
 ***
 
