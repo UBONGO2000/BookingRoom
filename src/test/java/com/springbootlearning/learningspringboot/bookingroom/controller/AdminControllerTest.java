@@ -10,16 +10,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -61,6 +65,46 @@ class AdminControllerTest {
     void adminDashboard_shouldSucceed_forAdmin() throws Exception {
         mockMvc.perform(get("/admin"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminDashboard_shouldPaginateBookings_andKeepFilters() throws Exception {
+        Room room = roomRepository.save(new Room(
+                "Salle Pagination", "desc", 10, "Batiment P", false, false, false));
+        User owner = userService.register(
+                "Page", "Test", "page_owner", "page_owner@test.com", "Password@123");
+        for (int i = 0; i < 3; i++) {
+            bookingRepository.save(new Booking(
+                    "Reservation " + i,
+                    LocalDateTime.now().plusDays(i + 1),
+                    LocalDateTime.now().plusDays(i + 1).plusHours(1),
+                    owner,
+                    room));
+        }
+
+        MvcResult firstPage = mockMvc.perform(get("/admin")
+                        .param("roomName", "pagination")
+                        .param("username", "page_owner")
+                        .param("page", "0")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("totalItems", 3L))
+                .andExpect(model().attribute("totalPages", 2))
+                .andReturn();
+
+        Page<?> page0 = (Page<?>) firstPage.getModelAndView().getModel().get("bookings");
+        assertThat(page0.getContent()).hasSize(2);
+
+        // Les liens de pagination conservent les filtres courants.
+        mockMvc.perform(get("/admin")
+                        .param("roomName", "pagination")
+                        .param("username", "page_owner")
+                        .param("page", "1")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("roomName=pagination")))
+                .andExpect(content().string(containsString("username=page_owner")));
     }
 
     @Test

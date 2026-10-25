@@ -7,6 +7,8 @@ import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +26,6 @@ public class BookingService {
         this.roomRepository = roomRepository;
     }
 
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
-    }
-
     public List<Booking> getBookingsByUser(String username) {
         return bookingRepository.findByUserUsername(username);
     }
@@ -43,11 +41,19 @@ public class BookingService {
                 room, LocalDateTime.now(), BookingStatus.CONFIRMED);
     }
 
-    public List<Booking> searchBookings(String roomName, String username) {
-        return bookingRepository.findAll().stream()
-                .filter(b -> roomName == null || roomName.isEmpty() || b.getRoom().getName().toLowerCase().contains(roomName.toLowerCase()))
-                .filter(b -> username == null || username.isEmpty() || b.getUser().getUsername().toLowerCase().contains(username.toLowerCase()))
-                .toList();
+    // Recherche paginee en base : le filtrage ne charge plus toutes les reservations.
+    public Page<Booking> searchBookings(String roomName, String username, Pageable pageable) {
+        return bookingRepository.searchBookings(
+                toLikePattern(roomName),
+                toLikePattern(username),
+                pageable);
+    }
+
+    private static String toLikePattern(String value) {
+        if (value == null || value.isBlank()) {
+            return "%";
+        }
+        return "%" + value.trim().toLowerCase() + "%";
     }
 
     public boolean isRoomAvailable(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {

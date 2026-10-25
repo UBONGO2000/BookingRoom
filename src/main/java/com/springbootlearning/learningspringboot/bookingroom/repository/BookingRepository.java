@@ -3,6 +3,8 @@ package com.springbootlearning.learningspringboot.bookingroom.repository;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,6 +38,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserUsernameAndEndTimeAfterAndStatusOrderByStartTimeAsc(String username, LocalDateTime now, BookingStatus status);
 
     boolean existsByRoomIdAndEndTimeAfterAndStatus(Long roomId, LocalDateTime now, BookingStatus status);
+
+    @EntityGraph(attributePaths = {"room", "user"})
+    @Query("""
+            SELECT b FROM Booking b
+            WHERE LOWER(b.room.name) LIKE :roomFilter
+              AND LOWER(b.user.username) LIKE :usernameFilter
+            """)
+    Page<Booking> searchBookings(@Param("roomFilter") String roomFilter,
+                                 @Param("usernameFilter") String usernameFilter,
+                                 Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.room.id = :roomId AND b.status = :status " +
            "AND ((b.startTime < :endTime AND b.endTime > :startTime))")

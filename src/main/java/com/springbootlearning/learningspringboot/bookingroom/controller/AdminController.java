@@ -1,11 +1,16 @@
 package com.springbootlearning.learningspringboot.bookingroom.controller;
 
+import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +25,11 @@ import java.security.Principal;
 @RequestMapping("/admin")
 public class AdminController {
 
+    // Tri deterministe : plus recent d'abord, id en departage.
+    private static final Sort BOOKING_SORT = Sort.by(
+            Sort.Order.desc("startTime"),
+            Sort.Order.asc("id"));
+
     private final RoomService roomService;
     private final BookingService bookingService;
     private final UserRepository userRepository;
@@ -33,16 +43,30 @@ public class AdminController {
     @GetMapping
     public String adminDashboard(Model model, Principal principal,
                                  @RequestParam(required = false) String roomName,
-                                 @RequestParam(required = false) String username) {
+                                 @RequestParam(required = false) String username,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(defaultValue = "10") int size) {
         addUserToModel(model, principal);
         model.addAttribute("rooms", roomService.getAllRooms());
-        
-        if ((roomName != null && !roomName.isEmpty()) || (username != null && !username.isEmpty())) {
-            model.addAttribute("bookings", bookingService.searchBookings(roomName, username));
-        } else {
-            model.addAttribute("bookings", bookingService.getAllBookings());
+
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        int safePage = Math.max(page, 0);
+
+        Pageable pageable = PageRequest.of(safePage, safeSize, BOOKING_SORT);
+        Page<Booking> bookings = bookingService.searchBookings(roomName, username, pageable);
+
+        // Page hors limites (filtre change, URL ancienne...) : on revient sur la derniere page.
+        if (bookings.getTotalPages() > 0 && safePage >= bookings.getTotalPages()) {
+            safePage = bookings.getTotalPages() - 1;
+            bookings = bookingService.searchBookings(
+                    roomName, username, PageRequest.of(safePage, safeSize, BOOKING_SORT));
         }
-        
+
+        model.addAttribute("bookings", bookings);
+        model.addAttribute("currentPage", bookings.getNumber());
+        model.addAttribute("totalPages", bookings.getTotalPages());
+        model.addAttribute("totalItems", bookings.getTotalElements());
+        model.addAttribute("pageSize", bookings.getSize());
         model.addAttribute("roomName", roomName);
         model.addAttribute("username", username);
         return "pages/admin/dashboard";

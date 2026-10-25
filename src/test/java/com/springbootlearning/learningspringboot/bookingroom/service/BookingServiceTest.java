@@ -13,9 +13,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -63,20 +66,35 @@ class BookingServiceTest {
     }
 
     // ==========================================
-    // TEST : getAllBookings
+    // TEST : searchBookings (pagination en base)
     // ==========================================
     @Test
-    void getAllBookings_shouldReturnList() {
+    void searchBookings_shouldQueryDatabaseWithNormalizedFilters() {
         // Given
-        List<Booking> expectedList = Arrays.asList(booking, new Booking());
-        when(bookingRepository.findAll()).thenReturn(expectedList);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Booking> expected = new PageImpl<>(List.of(booking), pageable, 1);
+        when(bookingRepository.searchBookings("%salle conf%", "%bob%", pageable)).thenReturn(expected);
 
         // When
-        List<Booking> result = bookingService.getAllBookings();
+        Page<Booking> result = bookingService.searchBookings("  Salle CONf ", "BOB", pageable);
 
         // Then
-        assertThat(result).hasSize(2);
-        verify(bookingRepository).findAll();
+        assertThat(result.getContent()).containsExactly(booking);
+        verify(bookingRepository).searchBookings("%salle conf%", "%bob%", pageable);
+    }
+
+    @Test
+    void searchBookings_withBlankFilters_shouldUseWildcard() {
+        // Given
+        Pageable pageable = PageRequest.of(0, 10);
+        when(bookingRepository.searchBookings("%", "%", pageable))
+                .thenReturn(new PageImpl<>(List.of(booking), pageable, 1));
+
+        // When
+        bookingService.searchBookings("  ", null, pageable);
+
+        // Then
+        verify(bookingRepository).searchBookings("%", "%", pageable);
     }
 
     // ==========================================
@@ -130,55 +148,6 @@ class BookingServiceTest {
         assertThat(result).hasSize(1);
         verify(bookingRepository).findByRoomAndEndTimeAfterAndStatusOrderByStartTimeAsc(
                 eq(room), any(LocalDateTime.class), eq(BookingStatus.CONFIRMED));
-    }
-
-    // ==========================================
-    // TEST : searchBookings
-    // ==========================================
-    @Test
-    void searchBookings_shouldFilterByRoomName() {
-        // Given
-        Booking booking1 = new Booking("T1", LocalDateTime.now(), LocalDateTime.now().plusHours(1), user, room);
-        Room otherRoom = new Room("Salle Conf","bla bla bla",60,"1 rue de la liberté",true,false,false);
-        Booking booking2 = new Booking("T2", LocalDateTime.now(), LocalDateTime.now().plusHours(1), user, otherRoom);
-
-        List<Booking> allBookings = Arrays.asList(booking1, booking2);
-        when(bookingRepository.findAll()).thenReturn(allBookings);
-
-        // When (Recherche insensible à la casse)
-        List<Booking> result = bookingService.searchBookings("salle conf", null);
-
-        // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getRoom().getName()).isEqualTo("Salle Conf");
-    }
-
-    @Test
-    void searchBookings_shouldFilterByUsername() {
-        // Given
-        User bob = new User("batelemie","OWONA","bob","bob@gmail.com","bob123");
-        Booking bookingBob = new Booking("T1", LocalDateTime.now(), LocalDateTime.now().plusHours(1), bob, room);
-
-        when(bookingRepository.findAll()).thenReturn(Collections.singletonList(bookingBob));
-
-        // When
-        List<Booking> result = bookingService.searchBookings(null, "BOB");
-
-        // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getUser().getUsername()).isEqualTo("bob");
-    }
-
-    @Test
-    void searchBookings_withNullParams_shouldReturnAll() {
-        // Given
-        when(bookingRepository.findAll()).thenReturn(Collections.singletonList(booking));
-
-        // When
-        List<Booking> result = bookingService.searchBookings(null, null);
-
-        // Then
-        assertThat(result).hasSize(1);
     }
 
     // ==========================================

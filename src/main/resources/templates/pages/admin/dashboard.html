@@ -90,7 +90,7 @@
                 <a th:href="@{/admin}" class="btn btn-outline">Réinitialiser</a>
             </form>
         </div>
-        <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+        <div th:if="${#lists.isEmpty(bookings.content)}" class="empty-state">
             <div class="empty-state-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
@@ -100,7 +100,7 @@
             <p>Aucune réservation ne correspond à ces filtres pour le moment.</p>
         </div>
 
-        <table th:unless="${#lists.isEmpty(bookings)}" class="data-table">
+        <table th:unless="${#lists.isEmpty(bookings.content)}" class="data-table">
             <thead>
                 <tr>
                     <th>Salle</th>
@@ -113,7 +113,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="booking : ${bookings}">
+                <tr th:each="booking : ${bookings.content}">
                     <td th:text="${booking.room.name}">Salle</td>
                     <td th:text="${booking.user.firstname + ' ' + booking.user.lastname}">User</td>
                     <td th:text="${booking.title}">Titre</td>
@@ -132,6 +132,20 @@
                 </tr>
             </tbody>
         </table>
+
+        <div th:if="${totalPages > 1}" class="pagination">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/admin(page=${currentPage - 1}, size=${pageSize}, roomName=${roomName}, username=${username})}"
+               class="btn-page">Précédent</a>
+            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <a th:href="@{/admin(page=${i}, size=${pageSize}, roomName=${roomName}, username=${username})}"
+                   th:text="${i + 1}"
+                   th:class="${currentPage == i} ? 'btn-page active' : 'btn-page'"></a>
+            </span>
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/admin(page=${currentPage + 1}, size=${pageSize}, roomName=${roomName}, username=${username})}"
+               class="btn-page">Suivant</a>
+        </div>
     </section>
 </main>
 
