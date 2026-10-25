@@ -93,6 +93,10 @@ Lance ensuite avec le profil `dev` (nécessaire pour créer les données de dém
 
 Ouvre `http://localhost:8080`.
 
+### Migrations de base
+
+Le schéma est versionné avec Flyway dans `src/main/resources/db/migration` : les scripts communs (`common/`) et une variante par moteur (`h2/` pour les tests, `postgresql/` pour la prod). `ddl-auto=validate` vérifie que les entités correspondent aux migrations, sans jamais modifier le schéma. Une base existante sans historique Flyway est baselinée en V1, puis les migrations suivantes sont appliquées au démarrage.
+
 ### Comptes de démo
 
 Créés automatiquement au premier démarrage **en profil `dev` uniquement** (aucun compte en `prod`) :
@@ -175,7 +179,7 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 87,1 % | 85,9 % |
+| Ensemble du projet | 87,4 % | 86,3 % |
 | Couche service | 96,8 % | 96,8 % |
 | Couche contrôleur | 79,8 % | 82,7 % |
 
