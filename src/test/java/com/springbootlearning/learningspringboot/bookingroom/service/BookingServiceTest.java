@@ -4,6 +4,7 @@ import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
+import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,9 @@ class BookingServiceTest {
 
     @Mock
     private BookingRepository bookingRepository;
+
+    @Mock
+    private RoomRepository roomRepository;
 
     @InjectMocks
     private BookingService bookingService;
@@ -224,11 +228,13 @@ class BookingServiceTest {
         assertThatThrownBy(() -> bookingService.createBooking("Titre", pastTime, futureEndTime, user, room))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Vous ne pouvez pas réserver dans le passé.");
+        verify(roomRepository, never()).findByIdForUpdate(anyLong());
     }
 
     @Test
     void createBooking_shouldThrowException_ifRoomNotAvailable() {
         // Given
+        when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
         // On simule que la méthode findOverlappingBookings renvoie une réservation (conflit)
         when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.singletonList(new Booking()));
 
@@ -242,6 +248,7 @@ class BookingServiceTest {
     void createBooking_shouldThrowException_ifRoomFlagIsFalse() {
         // Given
         room.setAvailable(false);
+        when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
         when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
 
         // When & Then
@@ -254,6 +261,7 @@ class BookingServiceTest {
     void createBooking_shouldThrowException_ifStartTimeBeforeRoomAvailableFrom() {
         // Given
         room.setAvailableFrom(futureStartTime.plusHours(2)); // La salle ouvre plus tard que la demande
+        when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
         when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
 
         // When & Then
@@ -266,6 +274,7 @@ class BookingServiceTest {
     void createBooking_shouldThrowException_ifEndTimeAfterRoomAvailableUntil() {
         // Given
         room.setAvailableUntil(futureStartTime.minusHours(1)); // La salle ferme avant le début
+        when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
         when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
 
         // When & Then
@@ -277,6 +286,7 @@ class BookingServiceTest {
     @Test
     void createBooking_shouldSuccess_andSaveBooking() {
         // Given
+        when(roomRepository.findByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
         when(bookingRepository.findOverlappingBookings(anyLong(), any(), any())).thenReturn(Collections.emptyList());
 
         // On simule le retour du save (généralement la BD renvoie l'objet avec l'ID généré)

@@ -1,6 +1,7 @@
 package com.springbootlearning.learningspringboot.bookingroom.exception;
 
 import com.springbootlearning.learningspringboot.bookingroom.controller.ApiController;
+import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Accès refusé"));
+    }
+
+    // Conflit de creneau : 409, plus precis qu'un 400 pour un client REST.
+    @ExceptionHandler(BookingConflictException.class)
+    public ResponseEntity<Map<String, String>> handleBookingConflict(BookingConflictException ex) {
+        log.warn("Conflit de reservation (API) : {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
     }
 
     // RuntimeException porte des messages metier volontairement destines a l'utilisateur

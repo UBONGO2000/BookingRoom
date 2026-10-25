@@ -5,6 +5,7 @@ import com.springbootlearning.learningspringboot.bookingroom.dto.LoginRequest;
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomResponse;
 import com.springbootlearning.learningspringboot.bookingroom.dto.RoomSearchDto;
 import com.springbootlearning.learningspringboot.bookingroom.dto.UserResponse;
+import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
@@ -178,6 +179,9 @@ public class ApiController {
             response.put("id", booking.getId());
             response.put("message", "Réservation créée avec succès");
             return ResponseEntity.ok(response);
+        } catch (BookingConflictException e) {
+            // Conflit de creneau : 409 rendu par l'ApiExceptionHandler.
+            throw e;
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());

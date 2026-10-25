@@ -1,10 +1,13 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
 
+import com.springbootlearning.learningspringboot.bookingroom.exception.BookingConflictException;
 import com.springbootlearning.learningspringboot.bookingroom.model.Booking;
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
+import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,9 +16,11 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final RoomRepository roomRepository;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository) {
         this.bookingRepository = bookingRepository;
+        this.roomRepository = roomRepository;
     }
 
     public List<Booking> getAllBookings() {
@@ -51,26 +56,33 @@ public class BookingService {
         return overlapping.isEmpty();
     }
 
+    @Transactional
     public Booking createBooking(String title, LocalDateTime startTime, LocalDateTime endTime, User user, Room room) {
         if (startTime.isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Vous ne pouvez pas réserver dans le passé.");
         }
-        if (!isRoomAvailable(room.getId(), startTime, endTime)) {
-            throw new RuntimeException("La salle est déjà réservée pour cette plage horaire.");
+
+        // Verrou pessimiste sur la salle : deux creations simultanees sont
+        // serialisees, la seconde voit la reservation de la premiere et echoue.
+        Room lockedRoom = roomRepository.findByIdForUpdate(room.getId())
+                .orElseThrow(() -> new RuntimeException("La salle n'existe pas."));
+
+        if (!isRoomAvailable(lockedRoom.getId(), startTime, endTime)) {
+            throw new BookingConflictException("La salle est déjà réservée pour cette plage horaire.");
         }
-        if (!room.getAvailable()) {
+        if (!lockedRoom.getAvailable()) {
             throw new RuntimeException("La salle n'est pas disponible pour le moment.");
         }
-        
+
         // Vérification de la plage de disponibilité de la salle
-        if (room.getAvailableFrom() != null && startTime.isBefore(room.getAvailableFrom())) {
-            throw new RuntimeException("La salle n'est disponible qu'à partir du " + room.getAvailableFrom().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        if (lockedRoom.getAvailableFrom() != null && startTime.isBefore(lockedRoom.getAvailableFrom())) {
+            throw new RuntimeException("La salle n'est disponible qu'à partir du " + lockedRoom.getAvailableFrom().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         }
-        if (room.getAvailableUntil() != null && endTime.isAfter(room.getAvailableUntil())) {
-            throw new RuntimeException("La salle n'est plus disponible après le " + room.getAvailableUntil().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        if (lockedRoom.getAvailableUntil() != null && endTime.isAfter(lockedRoom.getAvailableUntil())) {
+            throw new RuntimeException("La salle n'est plus disponible après le " + lockedRoom.getAvailableUntil().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         }
 
-        Booking booking = new Booking(title, startTime, endTime, user, room);
+        Booking booking = new Booking(title, startTime, endTime, user, lockedRoom);
         return bookingRepository.save(booking);
     }
 

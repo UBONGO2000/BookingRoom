@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,7 +21,9 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -148,8 +151,23 @@ class ApiControllerTest {
     }
 
     @Test
-    void dashboardShouldHidePastBookings() throws Exception {
-        User user = userRepository.findByUsername("apiuser").orElseThrow();
+    void bookingConflictReturns409() throws Exception {
+        Room room = roomRepository.findByNameIgnoreCase("Salle API").orElseThrow();
+        LocalDateTime start = LocalDateTime.now().plusDays(1);
+        String payload = """
+                {"title":"Conflit","startTime":"%s","endTime":"%s","roomId":%d}
+                """.formatted(start, start.plusHours(1), room.getId());
+
+        mockMvc.perform(post("/api/reservations")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("La salle est déjà réservée pour cette plage horaire."));
+    }
+
+    @Test
+    void dashboardShouldHidePastBookings() throws Exception {        User user = userRepository.findByUsername("apiuser").orElseThrow();
         Room room = roomRepository.findByNameIgnoreCase("Salle API").orElseThrow();
         LocalDateTime pastStart = LocalDateTime.now().minusDays(2);
         Booking pastBooking = bookingRepository.save(new Booking(
