@@ -159,16 +159,18 @@ Ce qui est en place aujourd'hui :
 - **CSRF** activé partout, y compris sur `/api/**` : seul `POST /api/auth/login` est exempté. Le client récupère le token via `GET /api/csrf` (cookie `XSRF-TOKEN`) et l'envoie dans l'en-tête `X-XSRF-TOKEN`.
 - **Mots de passe** hachés en BCrypt.
 - **Rôles** USER/ADMIN avec séparation stricte des routes — vérifiée par des tests, pas juste "ça marche chez moi".
-- **Anti brute-force** : un compte se verrouille 15 minutes après 5 échecs de connexion (formulaire et API), seuils réglables via `LOGIN_MAX_ATTEMPTS` et `LOGIN_LOCK_DURATION_MINUTES`.
+- **Anti brute-force** : un compte se verrouille 15 minutes après 5 échecs de connexion (formulaire et API), seuils réglables via `LOGIN_MAX_ATTEMPTS` et `LOGIN_LOCK_DURATION_MINUTES`. Les tentatives sont aussi limitées par IP (`LOGIN_RATE_LIMIT_MAX`, `LOGIN_RATE_LIMIT_WINDOW`).
+- **En-têtes de sécurité** : HSTS (sur HTTPS), CSP stricte sans `unsafe-inline` (styles et scripts externalisés), `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (caméra/micro/géolocalisation désactivés), `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`.
+- **Cookies** : session `HttpOnly` + `SameSite=Lax` + `Secure` en prod ; cookie CSRF `SameSite=Lax` et lisible par le JS (nécessaire pour l'API).
 - **Gestion d'erreurs séparée** : les pages web reçoivent une page d'erreur HTML, l'API reçoit du JSON — pas de page HTML renvoyée à un client mobile qui attendait une réponse structurée.
 - **Profil `prod`** (`SPRING_PROFILES_ACTIVE=prod`, déjà positionné dans le `Dockerfile`) : identifiants **sans valeur de repli** (l'application refuse de démarrer si `DB_URL`, `DB_USERNAME` ou `DB_PASSWORD` manquent), SQL non loggé et Hibernate en `validate` au lieu de `update`. Les défauts du fichier commun restent orientés dev pour ne pas se prendre les pieds dans le tapis en local.
 - Déconnexion propre : session invalidée, cookies supprimés.
 
 Ce qu'il resterait à faire avant un vrai déploiement en prod :
 
-- Activer HTTPS (question d'infra, pas de code ici).
-- Ajouter des headers de sécurité supplémentaires (HSTS, CSP...).
-- S'assurer que la base cible est bien PostgreSQL, pas H2.
+- Activer HTTPS derrière un reverse proxy (HSTS et cookies `Secure` ne s'appliquent qu'en HTTPS).
+- Vérifier que le proxy transmet bien `X-Forwarded-Proto` (déjà traité par `server.forward-headers-strategy=framework`).
+- Lancer un scan ZAP complet sur l'environnement cible.
 
 ***
 
@@ -178,11 +180,11 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-105 tests répartis sur 18 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+115 tests répartis sur 18 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 87,4 % | 86,3 % |
+| Ensemble du projet | 87,9 % | 87,5 % |
 | Couche service | 96,8 % | 96,8 % |
 | Couche contrôleur | 79,8 % | 82,7 % |
 

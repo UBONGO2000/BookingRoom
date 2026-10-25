@@ -50,6 +50,11 @@
                 Trop de tentatives échouées. Réessayez dans quelques minutes.
             </div>
 
+            <!-- Message de limitation par IP -->
+            <div th:if="${param.ratelimited}" class="alert alert-error">
+                Trop de tentatives de connexion. Réessayez dans une minute.
+            </div>
+
             <!-- Message d'inscription réussie -->
             <div th:if="${param.registered}" class="alert alert-success">
                 Inscription réussie ! Veuillez vous connecter.

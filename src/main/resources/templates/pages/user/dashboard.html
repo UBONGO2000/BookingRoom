@@ -50,7 +50,7 @@
                             <div class="action">
                                 <a th:href="@{/booking/{id}(id=${b.room.id})}" class="btn-detail">Voir salle</a>
                                 <form th:action="@{/booking/cancel/{id}(id=${b.id})}" method="post">
-                                    <button type="submit" class="btn-cancel" onclick="return confirm('Voulez-vous vraiment annuler cette réservation ?')">Annuler</button>
+                                    <button type="submit" class="btn-cancel" data-confirm="Voulez-vous vraiment annuler cette réservation ?">Annuler</button>
                                 </form>
                             </div>
                         </div>

@@ -70,7 +70,7 @@
                             <form th:action="@{/admin/rooms/toggle-availability/{id}(id=${room.id})}" method="post" class="inline-form">
                                 <button type="submit" class="btn btn-secondary btn-sm" th:text="${room.available ? 'Désactiver' : 'Activer'}">Toggle</button>
                             </form>
-                            <form th:action="@{/admin/rooms/delete/{id}(id=${room.id})}" method="post" class="inline-form" onsubmit="return confirm('Supprimer cette salle ?')">
+                            <form th:action="@{/admin/rooms/delete/{id}(id=${room.id})}" method="post" class="inline-form" data-confirm="Supprimer cette salle ?">
                                 <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
                             </form>
                         </div>
@@ -125,7 +125,7 @@
                     </td>
                     <td>
                         <form th:if="${booking.status.name() != 'CANCELLED'}" th:action="@{/booking/cancel/{id}(id=${booking.id})}" method="post">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Annuler cette réservation ?')">Annuler</button>
+                            <button type="submit" class="btn btn-danger btn-sm" data-confirm="Annuler cette réservation ?">Annuler</button>
                         </form>
                         <span th:if="${booking.status.name() == 'CANCELLED'}">—</span>
                     </td>
