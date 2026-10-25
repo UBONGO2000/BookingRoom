@@ -65,10 +65,13 @@ Architecture en couches assez classique pour du Spring Boot :
 
 ### Avec Docker
 
+Renseigne `DB_PASSWORD` dans `.env` (obligatoire), puis :
+
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
-Puis direction `http://localhost:8080`.
+
+L'app tourne en profil `prod` (aucun compte de démo), avec PostgreSQL dans un volume dédié. Le healthcheck est exposé sur `http://localhost:8080/actuator/health` ; `docker compose ps` doit afficher les deux services `healthy`.
 
 ### En local, sans Docker
 
@@ -175,7 +178,7 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw test
 ```
 
-104 tests répartis sur 18 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+105 tests répartis sur 18 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|

@@ -59,6 +59,13 @@ class SecurityConfigTest {
     }
 
     @Test
+    void healthEndpointIsPublic() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
     void apiPostWithoutCsrfIsForbidden() throws Exception {
         mockMvc.perform(post("/api/reservations")
                         .contentType("application/json")

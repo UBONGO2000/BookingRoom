@@ -3,6 +3,14 @@ mvnw
 mvnw.cmd
 .mvn/
 .git/
+.github/
 .idea/
 *.iml
 Dockerfile
+docker-compose.yml
+.env
+.env.*
+doc.md
+AUDIT.md
+README.md
+*.log

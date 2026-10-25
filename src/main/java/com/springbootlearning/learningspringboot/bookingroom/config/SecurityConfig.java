@@ -71,7 +71,7 @@ public class SecurityConfig {
                                 new NegatedRequestMatcher(new AntPathRequestMatcher("/api/**"))))
                 .authorizeHttpRequests(
                 auth ->auth
-                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**").permitAll()
+                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**", "/actuator/health").permitAll()
                         .requestMatchers("/api/auth/login", "/api/csrf").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
