@@ -34,10 +34,6 @@
             <h1>Créer un compte</h1>
             <p>Rejoignez BookingRoom pour réserver vos espaces.</p>
 
-            <!-- Messages d'erreur globaux -->
-            <div th:if="${usernameError}" class="alert alert-error" th:text="${usernameError}"></div>
-            <div th:if="${emailError}" class="alert alert-error" th:text="${emailError}"></div>
-
             <form th:action="@{/register}" method="post" th:object="${user}">
 
                 <div class="name-row">
@@ -101,6 +97,19 @@
                     </div>
                     <span th:if="${#fields.hasErrors('password')}" class="error-message" th:errors="*{password}"></span>
                     <small class="help-text">Au moins: 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial</small>
+                </div>
+
+                <!-- Confirmation du mot de passe -->
+                <div class="input-group">
+                    <label for="confirmPassword">Confirmer le mot de passe</label>
+                    <div class="input-wrapper">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3 3.1-3 1.71 0 3.1 1.29 3.1 3v2z"/>
+                        </svg>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Répétez le mot de passe" autocomplete="new-password" th:field="*{confirmPassword}">
+                    </div>
+                    <span th:if="${#fields.hasErrors('confirmPassword')}" class="error-message" th:errors="*{confirmPassword}"></span>
+                    <span th:if="${#fields.hasErrors('passwordConfirmed')}" class="error-message" th:errors="*{passwordConfirmed}"></span>
                 </div>
 
                 <button type="submit" class="auth-submit">S'inscrire</button>

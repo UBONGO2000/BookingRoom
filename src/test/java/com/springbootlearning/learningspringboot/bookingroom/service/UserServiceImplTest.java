@@ -1,4 +1,5 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
+import com.springbootlearning.learningspringboot.bookingroom.exception.UserAlreadyExistsException;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -69,8 +70,10 @@ class UserServiceImplTest {
 
         // WHEN & THEN
         assertThatThrownBy(() -> userService.register("Bob", "Smith", username, "bob@test.com", "Password@123"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Ce nom d'utilisateur est deja utilise");
+                .isInstanceOf(UserAlreadyExistsException.class)
+                .hasMessage("Ce nom d'utilisateur est deja utilise")
+                .satisfies(ex -> assertThat(((UserAlreadyExistsException) ex).getField())
+                        .isEqualTo("username"));
 
         // 2. Vérification que la BDD a bien été interrogée pour vérifier l'existence
         verify(userRepository).existsByUsername(username);
@@ -88,8 +91,10 @@ class UserServiceImplTest {
 
         // WHEN & THEN
         assertThatThrownBy(() -> userService.register("Alice", "Doe", username, email, "Password@123"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Cette adresse email est deja utilisee");
+                .isInstanceOf(UserAlreadyExistsException.class)
+                .hasMessage("Cette adresse email est deja utilisee")
+                .satisfies(ex -> assertThat(((UserAlreadyExistsException) ex).getField())
+                        .isEqualTo("email"));
 
         verify(userRepository).existsByUsername(username);
         verify(userRepository).existsByEmail(email);

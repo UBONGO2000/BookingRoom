@@ -1,5 +1,6 @@
 package com.springbootlearning.learningspringboot.bookingroom.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -29,6 +30,9 @@ public class RegisterFormDto {
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+",
              message = "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractere special")
     private String password;
+
+    @NotBlank(message = "La confirmation du mot de passe est obligatoire")
+    private String confirmPassword;
 
     public String getFirstname() {
         return firstname;
@@ -68,5 +72,26 @@ public class RegisterFormDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+    // La contrainte s'applique a la propriete "passwordConfirmed" : le template
+    // affiche l'erreur sous le champ de confirmation.
+    // Si un des deux champs est vide, on laisse @NotBlank produire le message
+    // adapte plutot que d'ajouter une fausse erreur de non-correspondance.
+    @AssertTrue(message = "Les mots de passe ne correspondent pas")
+    public boolean isPasswordConfirmed() {
+        if (password == null || password.isBlank()
+                || confirmPassword == null || confirmPassword.isBlank()) {
+            return true;
+        }
+        return password.equals(confirmPassword);
     }
 }

@@ -1,5 +1,6 @@
 package com.springbootlearning.learningspringboot.bookingroom.service;
 
+import com.springbootlearning.learningspringboot.bookingroom.exception.UserAlreadyExistsException;
 import com.springbootlearning.learningspringboot.bookingroom.model.User;
 import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,10 +24,10 @@ public class UserServiceImpl implements UserService{
     @Transactional
     public User register(String firstname, String lastname, String username, String email, String password) {
         if (existByUsername(username)) {
-            throw new IllegalArgumentException("Ce nom d'utilisateur est deja utilise");
+            throw new UserAlreadyExistsException("username", "Ce nom d'utilisateur est deja utilise");
         }
         if (existByEmail(email)) {
-            throw new IllegalArgumentException("Cette adresse email est deja utilisee");
+            throw new UserAlreadyExistsException("email", "Cette adresse email est deja utilisee");
         }
 
         User user = new User(firstname, lastname, username, email, passwordEncoder.encode(password));
