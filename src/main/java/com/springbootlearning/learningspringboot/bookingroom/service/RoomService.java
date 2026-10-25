@@ -6,9 +6,11 @@ import com.springbootlearning.learningspringboot.bookingroom.model.BookingStatus
 import com.springbootlearning.learningspringboot.bookingroom.model.Room;
 import com.springbootlearning.learningspringboot.bookingroom.repository.BookingRepository;
 import com.springbootlearning.learningspringboot.bookingroom.repository.RoomRepository;
+import com.springbootlearning.learningspringboot.bookingroom.repository.RoomSpecifications;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -39,35 +41,13 @@ public class RoomService {
         return roomRepository.findByAvailableTrue(pageable);
     }
 
+    // Recherche paginee en base (Specification) : tri deterministe par nom puis id.
     public Page<Room> searchRooms(RoomSearchDto criteria, Pageable pageable) {
-        List<Room> allFound = roomRepository.findAll().stream()
-                .filter(r -> Boolean.TRUE.equals(r.getAvailable()))
-                .filter(r -> criteria.getName() == null || criteria.getName().isBlank() || r.getName().toLowerCase().contains(criteria.getName().toLowerCase()))
-                .filter(r -> criteria.getCapacity() == null || r.getCapacity() >= criteria.getCapacity())
-                .filter(r -> !criteria.isProjector() || r.getProjector())
-                .filter(r -> !criteria.isWhiteboard() || r.getWhiteboard())
-                .filter(r -> !criteria.isVideoconferencing() || r.getVideoconferencing())
-                .toList();
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), allFound.size());
-
-        if (start > allFound.size()) {
-            return new PageImpl<>(List.of(), pageable, allFound.size());
-        }
-
-        return new PageImpl<>(allFound.subList(start, end), pageable, allFound.size());
-    }
-
-    public List<Room> searchRooms(RoomSearchDto criteria) {
-        return roomRepository.findAll().stream()
-                .filter(r -> Boolean.TRUE.equals(r.getAvailable()))
-                .filter(r -> criteria.getName() == null || criteria.getName().isBlank() || r.getName().toLowerCase().contains(criteria.getName().toLowerCase()))
-                .filter(r -> criteria.getCapacity() == null || r.getCapacity() >= criteria.getCapacity())
-                .filter(r -> !criteria.isProjector() || r.getProjector())
-                .filter(r -> !criteria.isWhiteboard() || r.getWhiteboard())
-                .filter(r -> !criteria.isVideoconferencing() || r.getVideoconferencing())
-                .toList();
+        Pageable sorted = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Order.asc("name").ignoreCase(), Sort.Order.asc("id")));
+        return roomRepository.findAll(RoomSpecifications.withCriteria(criteria), sorted);
     }
 
     public Optional<Room> getRoomByName(String name){

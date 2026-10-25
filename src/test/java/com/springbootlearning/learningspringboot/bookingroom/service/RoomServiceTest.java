@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -131,60 +132,28 @@ class RoomServiceTest {
     // ==========================================
 
     @Test
-    void searchRooms_shouldFilterByCapacity() {
-        // Given : On prépare 3 salles avec des capacités différentes
-        Room smallRoom = new Room("Petite", "desc", 10, "adr", true, false, false);
-        Room mediumRoom = new Room("Moyenne", "desc", 20, "adr", true, false, false);
-        Room bigRoom = new Room("Grande", "desc", 50, "adr", true, false, false);
-
-        List<Room> allRooms = Arrays.asList(smallRoom, mediumRoom, bigRoom);
-        when(roomRepository.findAll()).thenReturn(allRooms);
-
-        RoomSearchDto criteria = new RoomSearchDto();
-        criteria.setCapacity(25); // On veut au moins 25 places
-
-        // When
-        List<Room> result = roomService.searchRooms(criteria);
-
-        // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getCapacity()).isEqualTo(50);
-    }
-
-    @Test
-    void searchRoomsPageable_shouldReturnCorrectPage() {
-        // Given : Une liste de 3 salles
-        Room r1 = new Room("Room 1", "desc", 10, "adr", true, false, false);
-        Room r2 = new Room("Room 2", "desc", 20, "adr", true, false, false);
-        Room r3 = new Room("Room 3", "desc", 30, "adr", true, false, false);
-        List<Room> allRooms = Arrays.asList(r1, r2, r3);
-
-        when(roomRepository.findAll()).thenReturn(allRooms);
-
-        // On demande la page 1 (0-based index = 0) avec une taille de 2
-        Pageable pageable = PageRequest.of(0, 2);
-
-        // When
-        Page<Room> result = roomService.searchRooms(new RoomSearchDto(), pageable);
-
-        // Then
-        assertThat(result.getContent()).hasSize(2); // On doit avoir r1 et r2
-        assertThat(result.getTotalElements()).isEqualTo(3); // Total est 3
-    }
-
-    @Test
-    void searchRooms_shouldExcludeRoomsInMaintenance() {
+    void searchRooms_shouldQueryDatabaseWithSpecificationAndNameSort() {
         // Given
-        Room available = new Room("Disponible", "desc", 10, "adr", true, false, false);
-        Room maintenance = new Room("Fermee", "desc", 10, "adr", true, false, false);
-        maintenance.setAvailable(false);
-        when(roomRepository.findAll()).thenReturn(Arrays.asList(available, maintenance));
+        Pageable requested = PageRequest.of(1, 2);
+        Page<Room> expected = new PageImpl<>(List.of(room), requested, 10);
+        when(roomRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(expected);
 
         // When
-        List<Room> result = roomService.searchRooms(new RoomSearchDto());
+        Page<Room> result = roomService.searchRooms(new RoomSearchDto(), requested);
 
         // Then
-        assertThat(result).containsExactly(available);
+        assertThat(result).isSameAs(expected);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(roomRepository).findAll(any(Specification.class), captor.capture());
+        Pageable used = captor.getValue();
+        assertThat(used.getPageNumber()).isEqualTo(1);
+        assertThat(used.getPageSize()).isEqualTo(2);
+        assertThat(used.getSort().getOrderFor("name")).isNotNull();
+        assertThat(used.getSort().getOrderFor("id")).isNotNull();
+
+        // Plus de chargement complet de la table.
+        verify(roomRepository, never()).findAll();
     }
 
     @Test
