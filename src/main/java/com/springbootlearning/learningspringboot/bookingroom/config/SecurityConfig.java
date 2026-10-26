@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,13 +35,16 @@ public class SecurityConfig {
     private final LoginAttemptService loginAttemptService;
     private final LoginRateLimiter loginRateLimiter;
     private final boolean cookieSecure;
+    private final boolean apiDocsEnabled;
 
     public SecurityConfig(LoginAttemptService loginAttemptService,
                           LoginRateLimiter loginRateLimiter,
-                          @Value("${app.security.cookie-secure:false}") boolean cookieSecure) {
+                          @Value("${app.security.cookie-secure:false}") boolean cookieSecure,
+                          @Value("${springdoc.api-docs.enabled:false}") boolean apiDocsEnabled) {
         this.loginAttemptService = loginAttemptService;
         this.loginRateLimiter = loginRateLimiter;
         this.cookieSecure = cookieSecure;
+        this.apiDocsEnabled = apiDocsEnabled;
     }
 
     @Bean
@@ -75,6 +79,7 @@ public class SecurityConfig {
         http
                 .addFilterBefore(new LoginRateLimitFilter(loginAttemptService, loginRateLimiter),
                         UsernamePasswordAuthenticationFilter.class)
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
@@ -90,15 +95,19 @@ public class SecurityConfig {
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new NegatedRequestMatcher(new AntPathRequestMatcher("/api/**"))))
-                .authorizeHttpRequests(
-                auth ->auth
-                        .requestMatchers("/login","/register", "/", "/css/**", "/images/**", "/js/**", "/actuator/health").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/csrf").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/dashboard", "/booking/**").hasAnyRole("USER", "ADMIN")
-                        .anyRequest().authenticated()
-        )
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/login", "/register", "/", "/css/**", "/images/**", "/js/**", "/actuator/health").permitAll()
+                            .requestMatchers("/api/auth/login", "/api/csrf").permitAll();
+
+                    if (apiDocsEnabled) {
+                        auth.requestMatchers("/v3/api-docs", "/v3/api-docs/**").permitAll();
+                    }
+
+                    auth.requestMatchers("/api/**").authenticated()
+                            .requestMatchers("/admin/**").hasRole("ADMIN")
+                            .requestMatchers("/dashboard", "/booking/**").hasAnyRole("USER", "ADMIN")
+                            .anyRequest().authenticated();
+                })
         .headers(headers -> headers
                 .frameOptions(frame -> frame.sameOrigin())
                 .contentSecurityPolicy(csp -> csp.policyDirectives(

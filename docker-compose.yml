@@ -25,6 +25,7 @@ services:
       DB_URL: jdbc:postgresql://db:5432/bookingroom
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD dans .env}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
     ports:
       - "${APP_PORT:-8080}:8080"
     healthcheck:

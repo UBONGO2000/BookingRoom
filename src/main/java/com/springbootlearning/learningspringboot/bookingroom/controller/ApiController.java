@@ -23,6 +23,9 @@ import com.springbootlearning.learningspringboot.bookingroom.repository.UserRepo
 import com.springbootlearning.learningspringboot.bookingroom.security.LoginAttemptService;
 import com.springbootlearning.learningspringboot.bookingroom.service.BookingService;
 import com.springbootlearning.learningspringboot.bookingroom.service.RoomService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -54,6 +57,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @Validated
+@Tag(name = "API", description = "Salles, reservations, statistiques et profil (session HTTP + CSRF).")
+@SecurityRequirement(name = "sessionAuth")
 public class ApiController {
 
     private final RoomRepository roomRepository;
@@ -83,12 +88,14 @@ public class ApiController {
         this.loginAttemptService = loginAttemptService;
     }
 
+    @SecurityRequirements
     @GetMapping("/csrf")
     public ResponseEntity<CsrfResponse> csrf(HttpServletRequest request) {
         CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         return ResponseEntity.ok(new CsrfResponse(token.getToken()));
     }
 
+    @SecurityRequirements
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest body,
                                    HttpServletRequest request,
