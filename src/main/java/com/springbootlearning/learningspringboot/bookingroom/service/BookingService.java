@@ -84,7 +84,7 @@ public class BookingService {
         if (!isRoomAvailable(lockedRoom.getId(), startTime, endTime)) {
             throw new BookingConflictException("La salle est déjà réservée pour cette plage horaire.");
         }
-        if (!lockedRoom.getAvailable()) {
+        if (!lockedRoom.isAvailable()) {
             throw new RuntimeException("La salle n'est pas disponible pour le moment.");
         }
 

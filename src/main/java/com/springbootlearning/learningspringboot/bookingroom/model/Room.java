@@ -39,16 +39,16 @@ public class Room {
     private String location;
 
     @Column(nullable=false)
-    private Boolean projector;
+    private boolean projector;
 
     @Column(nullable=false)
-    private Boolean whiteboard;
+    private boolean whiteboard;
 
     @Column(nullable=false)
-    private Boolean videoconferencing;
+    private boolean videoconferencing;
 
     @Column(nullable = false)
-    private Boolean available = true;
+    private boolean available = true;
 
     private LocalDateTime availableFrom;
     private LocalDateTime availableUntil;
@@ -62,7 +62,7 @@ public class Room {
     public Room(){}
 
 
-    public Room(String name, String description, Integer capacity, String location, Boolean projector, Boolean whiteboard, Boolean videoconferencing) {
+    public Room(String name, String description, Integer capacity, String location, boolean projector, boolean whiteboard, boolean videoconferencing) {
         this.name = name;
         this.description = description;
         this.capacity = capacity;
@@ -114,35 +114,35 @@ public class Room {
         this.location = location;
     }
 
-    public Boolean getProjector() {
+    public boolean isProjector() {
         return projector;
     }
 
-    public void setProjector(Boolean projector) {
+    public void setProjector(boolean projector) {
         this.projector = projector;
     }
 
-    public Boolean getWhiteboard() {
+    public boolean isWhiteboard() {
         return whiteboard;
     }
 
-    public void setWhiteboard(Boolean whiteboard) {
+    public void setWhiteboard(boolean whiteboard) {
         this.whiteboard = whiteboard;
     }
 
-    public Boolean getVideoconferencing() {
+    public boolean isVideoconferencing() {
         return videoconferencing;
     }
 
-    public void setVideoconferencing(Boolean videoconferencing) {
+    public void setVideoconferencing(boolean videoconferencing) {
         this.videoconferencing = videoconferencing;
     }
 
-    public Boolean getAvailable() {
+    public boolean isAvailable() {
         return available;
     }
 
-    public void setAvailable(Boolean available) {
+    public void setAvailable(boolean available) {
         this.available = available;
     }
 
@@ -168,9 +168,5 @@ public class Room {
 
     public void setAvailableUntil(LocalDateTime availableUntil) {
         this.availableUntil = availableUntil;
-    }
-
-    public boolean isAvailable() {
-        return this.available;
     }
 }

@@ -41,13 +41,9 @@ public class BookingController {
 
 
     @GetMapping("/booking")
-    public String booking(Model model, Principal principal,
+    public String booking(Model model,
                           @ModelAttribute("roomsearch") RoomSearchDto criteria,
                           @RequestParam(defaultValue = "0") int page) {
-        if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
-        }
-
         int safePage = Math.max(page, 0);
         Page<Room> roomPage = roomService.searchRooms(criteria, PageRequest.of(safePage, 6));
 
@@ -65,13 +61,10 @@ public class BookingController {
 
 
     @GetMapping("/booking/{id}")
-    public String bookingDetail(@PathVariable Long id, Model model, Principal principal) {
+    public String bookingDetail(@PathVariable Long id, Model model) {
         Room room = roomService.getRoomById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette salle n'existe pas."));
 
-        if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
-        }
         model.addAttribute("room", room);
         model.addAttribute("bookings", bookingService.getBookingsByRoom(room));
         if (!model.containsAttribute("bookingForm")) {
@@ -97,7 +90,6 @@ public class BookingController {
             }
             Room room = roomService.getRoomById(bookingForm.roomId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette salle n'existe pas."));
-            userRepository.findByUsername(principal.getName()).ifPresent(user -> model.addAttribute("user", user));
             model.addAttribute("room", room);
             model.addAttribute("bookings", bookingService.getBookingsByRoom(room));
             return "pages/user/room-detail";

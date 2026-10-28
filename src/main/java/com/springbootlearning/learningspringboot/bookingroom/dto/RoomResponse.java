@@ -24,10 +24,10 @@ public record RoomResponse(
                 room.getDescription(),
                 room.getCapacity(),
                 room.getLocation(),
-                room.getProjector(),
-                room.getWhiteboard(),
-                room.getVideoconferencing(),
-                room.getAvailable(),
+                room.isProjector(),
+                room.isWhiteboard(),
+                room.isVideoconferencing(),
+                room.isAvailable(),
                 room.getAvailableFrom(),
                 room.getAvailableUntil()
         );

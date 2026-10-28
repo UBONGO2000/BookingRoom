@@ -72,7 +72,6 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = Role.USER;
-        this.createdAt = LocalDateTime.now();
     }
 
     public User(String firstname, String lastname,String username, String email, String password,Role role) {
@@ -82,7 +81,6 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
-        this.createdAt = LocalDateTime.now();
     }
 
 

@@ -290,7 +290,10 @@ class BookingServiceTest {
         assertThat(capturedBooking.getTitle()).isEqualTo("Titre");
         assertThat(capturedBooking.getUser()).isEqualTo(user);
         assertThat(capturedBooking.getRoom()).isEqualTo(room);
-        assertThat(capturedBooking.getCreatedAt()).isNotNull(); // Vérifie que le constructeur a bien initialisé la date
+        // createdAt est renseigne par @CreationTimestamp au moment du persist,
+        // pas par le constructeur (P2-4).
+        assertThat(capturedBooking.getCreatedAt()).isNull();
+        assertThat(capturedBooking.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
     }
 
     // ==========================================

@@ -57,7 +57,6 @@ public class Booking {
         this.endTime = endTime;
         this.user = user;
         this.room = room;
-        this.createdAt = LocalDateTime.now();
     }
 
 
