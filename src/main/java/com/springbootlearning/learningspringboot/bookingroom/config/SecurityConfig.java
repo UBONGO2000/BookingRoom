@@ -96,7 +96,8 @@ public class SecurityConfig {
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new NegatedRequestMatcher(new AntPathRequestMatcher("/api/**"))))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/login", "/register", "/", "/css/**", "/images/**", "/js/**", "/actuator/health").permitAll()
+                    auth.requestMatchers("/login", "/register", "/", "/css/**", "/images/**", "/js/**",
+                                    "/actuator/health", "/actuator/info").permitAll()
                             .requestMatchers("/api/auth/login", "/api/csrf").permitAll();
 
                     if (apiDocsEnabled) {

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Configuration
-@Profile("dev")
+@Profile({"dev", "demo"})
 public class DataInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
