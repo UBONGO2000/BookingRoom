@@ -1,6 +1,11 @@
 # BookingRoom
 
+[![CI](https://github.com/UBONGO2000/BookingRoom/actions/workflows/ci.yml/badge.svg)](https://github.com/UBONGO2000/BookingRoom/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Un projet Spring Boot que j'ai monté pour progresser sur l'écosystème Spring (Security, Data JPA, Thymeleaf...) en construisant quelque chose d'un peu plus consistant qu'un CRUD de démo : un outil de réservation de salles de réunion, avec comptes utilisateurs, espace admin, et une vraie couche de sécurité derrière.
+
+> **Tester rapidement** (profil `dev` ou instance de démonstration) : `admin` / `Admin@123` et `user` / `User@123`. Ces comptes ne sont jamais créés en `prod` — voir la section « Comptes de démo ».
 
 Stack : Java 21, Spring Boot 3.5, Spring Security, Thymeleaf, PostgreSQL, Docker, OpenAPI, tests automatisés.
 
@@ -93,7 +98,16 @@ cp .env.example .env   # fichier ignoré par Git, chargé automatiquement par Sp
 
 (ou exporte `DB_URL`, `DB_USERNAME` et `DB_PASSWORD` dans le shell)
 
-Lance ensuite avec le profil `dev` (nécessaire pour créer les données de démonstration) :
+Plus simple : laisse Docker fournir **uniquement PostgreSQL**, et lance l'application avec Maven (elle reste sur l'hôte, avec rechargement et logs dans le terminal) :
+
+```bash
+docker compose up -d db
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+La base est publiée sur `DB_PORT` (5432 par défaut) : si tu la changes, reporte le même port dans `DB_URL`. Sur Windows PowerShell, remplacer `cp` par `Copy-Item` et `./mvnw` par `.\mvnw.cmd`.
+
+Lance l'application seule, sans Docker, avec un PostgreSQL déjà installé :
 
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
@@ -103,30 +117,31 @@ Ouvre `http://localhost:8080`.
 
 En profil `dev`, la spécification OpenAPI est exposée en JSON sur `http://localhost:8080/v3/api-docs`. Swagger UI n'est volontairement pas activée : la CSP stricte du projet interdit les styles inline dont elle a besoin. Le JSON reste utilisable avec curl, Postman ou Insomnia.
 
-Sans profil `dev`, l'application démarre avec la configuration commune mais ne crée ni comptes de démo ni salles.
+Sans profil `dev` ou `demo`, l'application démarre avec la configuration commune mais ne crée ni comptes de démo ni salles.
 
 ### Profils
 
 | Profil | Usage | Comportement |
 |---|---|---|
 | `dev` | développement local | Seed des comptes de démo et de 15 salles, SQL loggé, cookies non `Secure`, JSON OpenAPI exposé. À ne pas utiliser comme profil de production. |
+| `demo` | instance publique de démonstration | Seed des comptes et des 15 salles, SQL non loggé, cookies `Secure`, `X-Forwarded-Proto` pris en compte, OpenAPI non exposé. Données fictives uniquement. |
 | `prod` | Docker / production | `DB_URL`, `DB_USERNAME` et `DB_PASSWORD` obligatoires sans valeur de repli, aucun seed, SQL non loggé, `flyway clean` interdit, cookies `Secure`, prise en compte de `X-Forwarded-Proto`, OpenAPI non exposé. |
 | `test` | tests automatisés | Base H2 en mémoire, migrations Flyway, pas de seed, SQL non loggé. |
 | *(aucun)* | démarrage local minimal | Configuration commune, pas de seed, PostgreSQL local par défaut, SQL loggé. |
 
-Le profil est choisi avec `SPRING_PROFILES_ACTIVE` (ou `-Dspring-boot.run.profiles=dev` avec Maven). Le `Dockerfile` force `prod`.
+Le profil est choisi avec `SPRING_PROFILES_ACTIVE` (ou `-Dspring-boot.run.profiles=dev` avec Maven). Le `Dockerfile` force `prod` ; Render peut le remplacer par `demo` pour une vitrine publique.
 
 ### Variables d'environnement
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `SPRING_PROFILES_ACTIVE` | *(aucun)* | `dev`, `prod` ou `test`. |
+| `SPRING_PROFILES_ACTIVE` | *(aucun)* | `dev`, `demo`, `prod` ou `test`. |
 | `APP_NAME` | `BookingRoom` | Nom Spring de l'application. |
 | `PORT` | `8080` | Port HTTP interne de l'application. |
 | `DB_URL` | `jdbc:postgresql://localhost:5432/bookingroom` en dev | URL JDBC. Obligatoire en `prod`. |
 | `DB_USERNAME` | `postgres` en dev | Utilisateur PostgreSQL. Obligatoire en `prod`. |
 | `DB_PASSWORD` | `password` en dev | Mot de passe PostgreSQL. Obligatoire en `prod` et avec Compose. |
-| `SEED_DEFAULT_USERS` | `true` en `dev` | Active le seed des comptes de démo. Forcé à `false` en `prod`. |
+| `SEED_DEFAULT_USERS` | `true` en `dev` et `demo` | Active le seed des comptes de démo. Forcé à `false` en `prod`. |
 | `SEED_ADMIN_USERNAME` | `admin` | Nom du compte admin de démo. |
 | `SEED_ADMIN_EMAIL` | `admin@gmail.com` | Email du compte admin de démo. |
 | `SEED_ADMIN_PASSWORD` | `Admin@123` | Mot de passe du compte admin de démo. |
@@ -137,9 +152,10 @@ Le profil est choisi avec `SPRING_PROFILES_ACTIVE` (ou `-Dspring-boot.run.profil
 | `LOGIN_LOCK_DURATION_MINUTES` | `15` | Durée du verrouillage d'un compte. |
 | `LOGIN_RATE_LIMIT_MAX` | `20` | Nombre de tentatives de login par IP et par fenêtre. |
 | `LOGIN_RATE_LIMIT_WINDOW` | `60` | Durée de la fenêtre de rate limiting, en secondes. |
-| `COOKIE_SECURE` | `false` en dev, `true` en `prod` | Attribut `Secure` des cookies de session et CSRF. |
+| `COOKIE_SECURE` | `false` en `dev`, `true` en `demo` et `prod` | Attribut `Secure` des cookies de session et CSRF. |
 | `CORS_ALLOWED_ORIGINS` | *(vide)* | Origines autorisées pour un front séparé, séparées par des virgules (ex. `http://localhost:5173`). `*` est refusé car les cookies de session imposent `allowCredentials=true`. |
 | `APP_PORT` | `8080` | Port publié par `docker compose` (variable Compose uniquement). |
+| `DB_PORT` | `5432` | Port hôte publié pour PostgreSQL par `docker compose` (variable Compose uniquement). |
 
 Le fichier `.env` est chargé automatiquement par Spring Boot via `spring.config.import` ; Docker Compose le lit aussi pour l'interpolation. Les variables d'environnement du système restent prioritaires.
 
@@ -151,7 +167,7 @@ Le schéma est versionné avec Flyway dans `src/main/resources/db/migration` : l
 
 ### Comptes de démo
 
-Créés automatiquement au premier démarrage **en profil `dev` uniquement** (aucun compte en `prod`) :
+Créés automatiquement au premier démarrage **en profil `dev` ou `demo` uniquement** (aucun compte en `prod`) :
 
 | Rôle | Utilisateur | Mot de passe |
 |------|-------------|---------------|
@@ -250,17 +266,47 @@ Ce qu'il resterait à faire avant un vrai déploiement en prod :
 ./mvnw clean verify
 ```
 
-122 tests répartis sur 23 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
+124 tests répartis sur 25 classes. Couverture de code (JaCoCo, générée automatiquement dans `target/site/jacoco/index.html`) :
 
 | Périmètre | Instructions | Lignes |
 |---|---|---|
-| Ensemble du projet | 88,9 % | 88,5 % |
+| Ensemble du projet | 89,2 % | 88,9 % |
 | Couche service | 96,5 % | 97,9 % |
-| Couche contrôleur | 81,8 % | 85,2 % |
+| Couche contrôleur | 82,8 % | 86,7 % |
 
 Le build `verify` applique un seuil JaCoCo : 80 % d'instructions, 80 % de lignes et 65 % de branches. En dessous, la construction échoue.
 
 La couche service est bien couverte (logique métier : recherche de salles, création de réservation, règles de disponibilité, annulation logique). Les contrôleurs le sont moins pour l'instant — j'ai ciblé volontairement les points les plus faciles à casser sans s'en rendre compte : que les routes admin refusent bien un utilisateur non-admin, qu'un utilisateur ne peut pas annuler la réservation de quelqu'un d'autre juste en devinant son id (protection IDOR), que deux créations simultanées sur le même créneau n'en laissent passer qu'une, et que l'inscription valide bien la confirmation du mot de passe. Les recherches paginées sont aussi testées : filtres conservés dans les liens, tri déterministe, et intégration avec plus de 100 salles pour vérifier que le filtrage reste en base. `HomeController` n'a pas encore de tests dédiés — prochaine étape logique si je continue à faire monter ce chiffre.
+
+***
+
+## Déploiement continu
+
+Le workflow `.github/workflows/ci.yml` exécute `./mvnw clean verify` sur chaque push et chaque pull request. Sur `main`, si le build passe, il déclenche le déploiement Render via un deploy hook, puis vérifie que le commit attendu est réellement en ligne.
+
+Secrets à configurer dans GitHub (`Settings → Secrets and variables → Actions`) :
+
+| Secret | Rôle |
+|---|---|
+| `RENDER_DEPLOY_HOOK_URL` | URL du deploy hook Render (Service → Settings → Deploy Hook). |
+| `RENDER_APP_URL` | URL publique du service (ex. `https://bookingroom.onrender.com`), utilisée pour le smoke test. |
+
+Le smoke test interroge `/actuator/info` : Render injecte `RENDER_GIT_COMMIT` dans l'environnement, l'application le renvoie, et le workflow attend de voir le SHA du commit courant. Cela évite de valider l'ancien conteneur encore en ligne pendant le build Render. Sans ces secrets, le job de déploiement est ignoré et le CI reste vert.
+
+Désactiver l'auto-deploy Render (*Settings → Build & Deploy → Auto-Deploy* sur `No`) : sinon Render déploie dès le push, avant même que la CI ait validé le commit, et le déploiement est lancé deux fois.
+
+Côté Render, le service doit être un **Web Service Docker** avec :
+
+- `SPRING_PROFILES_ACTIVE=demo` pour une instance de démonstration, ou `prod` pour de vraies données ;
+- `DB_URL` (`jdbc:postgresql://...`), `DB_USERNAME`, `DB_PASSWORD` ;
+- `COOKIE_SECURE=true` ;
+- health check sur `/actuator/health`.
+
+Les variables d'environnement Render ont priorité sur l'`ENV SPRING_PROFILES_ACTIVE=prod` du `Dockerfile` : le service peut donc démarrer en `demo` sans modifier l'image.
+
+Le profil `demo` crée les comptes publics `admin` / `Admin@123` et `user` / `User@123` ainsi que 15 salles : il ne doit contenir aucune donnée réelle. En `prod`, aucun compte n'est créé et l'inscription reste ouverte, mais il faut promouvoir manuellement le premier administrateur.
+
+En production, les logs sont émis en JSON (`logback-spring.xml`) pour être exploitables par la plateforme.
 
 ***
 

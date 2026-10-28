@@ -13,6 +13,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    # Publie la base sur l'hote pour le mode "docker compose up -d db"
+    # + application lancee par Maven (profil dev). DB_PORT doit correspondre
+    # au port utilise dans DB_URL.
+    ports:
+      - "${DB_PORT:-5432}:5432"
     restart: unless-stopped
 
   app:
