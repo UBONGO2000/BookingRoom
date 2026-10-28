@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -23,7 +23,32 @@ jobs:
       - name: Rendre le wrapper exécutable
         run: chmod +x mvnw
       - name: Build, tests et couverture
-        run: ./mvnw -B clean verify
+        run: ./mvnw -B --no-transfer-progress clean verify
+
+      # Un echec de test doit etre diagnosticable depuis le log et les
+      # annotations, sans avoir a ouvrir le rapport HTML.
+      - name: Résumé des tests en échec
+        if: failure()
+        run: |
+          shopt -s nullglob
+          reports=(target/surefire-reports/*.txt)
+          if [ ${#reports[@]} -eq 0 ]; then
+            echo "::error::Aucun rapport surefire : l'echec est survenu avant les tests."
+            exit 0
+          fi
+          failing=""
+          for report in "${reports[@]}"; do
+            if grep -qE "Failures: [1-9]|Errors: [1-9]" "$report"; then
+              failing="$failing $(basename "$report" .txt)"
+              echo "----- $report"
+              head -n 40 "$report"
+            fi
+          done
+          if [ -n "$failing" ]; then
+            echo "::error::Tests en echec :$failing"
+          else
+            echo "::error::Tous les tests passent : verifier les etapes de build (compilation, JaCoCo, packaging)."
+          fi
 
   deploy:
     name: Déploiement Render
