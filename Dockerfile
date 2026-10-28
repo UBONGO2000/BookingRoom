@@ -31,7 +31,9 @@ COPY --from=build --chown=app:app /app/target/*.jar app.jar
 # L'application ne tourne jamais en root.
 USER app
 EXPOSE 8080
+# Render (et la plupart des PaaS) imposent le port via PORT : le healthcheck
+# doit interroger le port reellement ecoute, pas 8080 en dur.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD curl -fsS http://localhost:8080/actuator/health || exit 1
+  CMD sh -c 'curl -fsS "http://localhost:${PORT:-8080}/actuator/health" || exit 1'
 
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]
