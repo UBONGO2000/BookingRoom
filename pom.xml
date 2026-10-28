@@ -12,19 +12,27 @@
     <artifactId>BookingRoom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>BookingRoom</name>
-    <description>BookingRoom</description>
-    <url/>
+    <description>Application de reservation de salles de reunion (Spring Boot, Thymeleaf, PostgreSQL, Docker).</description>
+    <url>https://github.com/UBONGO2000/BookingRoom</url>
     <licenses>
-        <license/>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>UBONGO2000</id>
+            <name>NTCHANGA NGUETNIANG Georges Urich</name>
+            <email>164538434+UBONGO2000@users.noreply.github.com</email>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git://github.com/UBONGO2000/BookingRoom.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/UBONGO2000/BookingRoom.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/UBONGO2000/BookingRoom</url>
     </scm>
     <properties>
         <java.version>21</java.version>
@@ -103,6 +111,12 @@
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
             <version>3.0.0</version>
+        </dependency>
+        <!-- Logs JSON en production (logback-spring.xml). -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
         </dependency>
     </dependencies>
 
